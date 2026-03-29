@@ -1,0 +1,452 @@
+# Chapter 5: Bilinear and Quadratic Forms
+
+In Chapter 3, we installed a ruler into the Axiomatic Void by introducing the inner product---a bilinear, symmetric, positive definite function that endowed bare vector spaces with the capacity for geometric measurement. In Chapter 4, we discovered that certain linear operators possess distinguished directions (eigenvectors) along which they act by pure scaling, and we learned to diagonalize symmetric matrices via orthogonal similarity.
+
+Now we take a decisive step beyond the inner product. We ask: what happens when we *relax* the requirement of positive definiteness? What if we allow our bilinear pairing to be indefinite, to assign negative "squared lengths" to nonzero vectors, to carve space into regions of positivity and negativity separated by a cone of vectors whose self-pairing vanishes?
+
+The answer is the theory of **bilinear and quadratic forms**---one of the oldest, deepest, and most consequential chapters of algebra. This theory does not merely generalize the inner product; it reveals the inner product as a single, highly special case within a vast landscape of algebraic geometries. Quadratic forms govern the classification of conic sections, the behavior of optimization problems near critical points, the structure of spacetime in special and general relativity, and the arithmetic of integers in number theory.
+
+> **Philosophical Insight**: The inner product says "all squared lengths are positive." This is an assertion about the fundamental character of the geometry. Releasing this constraint is like passing from Euclidean geometry to the geometries of Minkowski, Lorentz, and beyond---spaces where some directions are "timelike" and others "spacelike," where the very notion of distance acquires a richer, more ambiguous character.
+
+## Guiding Idea of the Chapter
+
+The central arc is this: a bilinear form is a machine that eats two vectors and produces a scalar, generalizing the inner product by dropping positive definiteness. From any symmetric bilinear form, we extract a quadratic form (the "diagonal" of the bilinear map), and from any quadratic form, we can recover the bilinear form via the polar identity. The fundamental classification theorem---Sylvester's law of inertia---states that over the reals, a quadratic form is determined up to change of basis by a single invariant: its **signature**, a triple $(p, q, z)$ counting the number of positive, negative, and zero diagonal entries after diagonalization. This signature governs everything: definiteness, the geometry of level sets, the nature of critical points in optimization, and the causal structure of spacetime.
+
+We will build this theory from first principles, classify forms over $\mathbb{R}$ and $\mathbb{C}$, study the geometry of isotropic subspaces and orthogonal complements, and connect the entire apparatus to the metric tensors that will be indispensable when we reach manifolds and sheaves.
+
+### Prerequisite Recall
+
+From Chapter 3, recall that a bilinear map $B : V \times V \to \mathbb{F}$ is a function that is linear in each argument separately. The inner product was a bilinear map with two additional properties: symmetry and positive definiteness. From Chapter 4, recall that a real symmetric matrix $A$ can be orthogonally diagonalized: $A = PDP^T$ where $P$ is orthogonal and $D$ is diagonal with real entries. We will use both facts extensively.
+
+## 5.1 Bilinear Forms: Definition and Matrix Representation
+
+### The General Definition
+
+Let $V$ be a finite-dimensional vector space over a field $\mathbb{F}$ (for us, $\mathbb{F} = \mathbb{R}$ or $\mathbb{F} = \mathbb{C}$). A **bilinear form** on $V$ is a function
+
+$$
+B : V \times V \to \mathbb{F}
+$$
+
+satisfying two linearity conditions:
+
+1. **Linearity in the first argument**: $B(\alpha \mathbf{u} + \beta \mathbf{v}, \mathbf{w}) = \alpha B(\mathbf{u}, \mathbf{w}) + \beta B(\mathbf{v}, \mathbf{w})$ for all $\alpha, \beta \in \mathbb{F}$ and $\mathbf{u}, \mathbf{v}, \mathbf{w} \in V$.
+
+2. **Linearity in the second argument**: $B(\mathbf{u}, \alpha \mathbf{v} + \beta \mathbf{w}) = \alpha B(\mathbf{u}, \mathbf{v}) + \beta B(\mathbf{u}, \mathbf{w})$ for all $\alpha, \beta \in \mathbb{F}$ and $\mathbf{u}, \mathbf{v}, \mathbf{w} \in V$.
+
+That is all. No symmetry is required. No positivity is assumed. The bilinear form is the most general "scalar-valued bilinear machine" on $V$.
+
+### The Matrix of a Bilinear Form
+
+Let $\mathcal{B} = \{\mathbf{e}_1, \dots, \mathbf{e}_n\}$ be a basis for $V$. The **matrix of $B$ with respect to $\mathcal{B}$** is the $n \times n$ matrix $A = [a_{ij}]$ defined by
+
+$$
+a_{ij} = B(\mathbf{e}_i, \mathbf{e}_j).
+$$
+
+If $\mathbf{u} = \sum_i x_i \mathbf{e}_i$ and $\mathbf{v} = \sum_j y_j \mathbf{e}_j$, then bilinearity gives
+
+$$
+B(\mathbf{u}, \mathbf{v}) = \sum_{i=1}^{n} \sum_{j=1}^{n} x_i \, a_{ij} \, y_j = \mathbf{x}^T A \, \mathbf{y},
+$$
+
+where $\mathbf{x} = [x_1, \dots, x_n]^T$ and $\mathbf{y} = [y_1, \dots, y_n]^T$ are the coordinate vectors. This is the fundamental formula: **every bilinear form on a finite-dimensional space is represented, in coordinates, by a matrix multiplication** $\mathbf{x}^T A \mathbf{y}$.
+
+> **Deep Connection**: The inner product of Chapter 3 corresponds to the special case $A = I$ (the identity matrix) in the standard basis. A weighted inner product corresponds to a diagonal matrix with positive entries. The full generality of bilinear forms corresponds to *arbitrary* matrices $A$---not necessarily symmetric, not necessarily invertible, not necessarily anything.
+
+### Change of Basis
+
+If $P$ is the change-of-basis matrix from $\mathcal{B}$ to a new basis $\mathcal{B}'$, then the matrix of $B$ in the new basis is
+
+$$
+A' = P^T A P.
+$$
+
+This is the **congruence transformation**. Note the crucial difference from the similarity transformation $P^{-1}AP$ encountered in eigenvalue theory (Chapter 4). The transpose $P^T$ appears instead of $P^{-1}$ because bilinear forms transform covariantly in both arguments. Two matrices related by $A' = P^T A P$ for some invertible $P$ are called **congruent**. Congruence is the natural equivalence relation for bilinear forms, just as similarity is the natural equivalence relation for linear maps.
+
+## 5.2 Symmetric and Antisymmetric Forms
+
+### Decomposition into Symmetric and Antisymmetric Parts
+
+A bilinear form $B$ is called **symmetric** if $B(\mathbf{u}, \mathbf{v}) = B(\mathbf{v}, \mathbf{u})$ for all $\mathbf{u}, \mathbf{v}$, and **antisymmetric** (or **skew-symmetric**) if $B(\mathbf{u}, \mathbf{v}) = -B(\mathbf{v}, \mathbf{u})$ for all $\mathbf{u}, \mathbf{v}$.
+
+In terms of the representing matrix: $B$ is symmetric if and only if $A = A^T$, and antisymmetric if and only if $A = -A^T$.
+
+Every bilinear form admits a unique decomposition into symmetric and antisymmetric parts:
+
+$$
+B = B_{\text{sym}} + B_{\text{anti}},
+$$
+
+where
+
+$$
+B_{\text{sym}}(\mathbf{u}, \mathbf{v}) = \frac{1}{2}\bigl(B(\mathbf{u}, \mathbf{v}) + B(\mathbf{v}, \mathbf{u})\bigr), \qquad B_{\text{anti}}(\mathbf{u}, \mathbf{v}) = \frac{1}{2}\bigl(B(\mathbf{u}, \mathbf{v}) - B(\mathbf{v}, \mathbf{u})\bigr).
+$$
+
+In matrix language, $A = \tfrac{1}{2}(A + A^T) + \tfrac{1}{2}(A - A^T)$.
+
+### The Significance of Each Part
+
+The symmetric part carries the "metric" information: it determines lengths, angles, and the associated quadratic form. The antisymmetric part carries "area" or "orientation" information: in two dimensions, the antisymmetric bilinear form $B_{\text{anti}}(\mathbf{u}, \mathbf{v}) = u_1 v_2 - u_2 v_1$ computes the signed area of the parallelogram spanned by $\mathbf{u}$ and $\mathbf{v}$.
+
+Antisymmetric bilinear forms are the algebraic precursors of **differential 2-forms** on manifolds, which play a central role in the exterior calculus and in the cohomological machinery underlying sheaf theory. For the remainder of this chapter, however, we focus primarily on symmetric bilinear forms, since they give rise to quadratic forms and the classification theory that is our main objective.
+
+> **Philosophical Insight**: The decomposition of a bilinear form into symmetric and antisymmetric parts is a microcosm of a pervasive theme in algebra: every object decomposes into parts that transform differently under the action of the symmetric group. Symmetric forms are invariant under swapping arguments; antisymmetric forms change sign. This is the simplest instance of the representation theory of $S_2$, the symmetric group on two elements.
+
+## 5.3 Quadratic Forms and the Polar Identity
+
+### From Bilinear to Quadratic
+
+Given a symmetric bilinear form $B$, the associated **quadratic form** is the function $Q : V \to \mathbb{F}$ defined by
+
+$$
+Q(\mathbf{v}) = B(\mathbf{v}, \mathbf{v}).
+$$
+
+In coordinates, if $B$ has matrix $A$ (symmetric), then
+
+$$
+Q(\mathbf{v}) = \mathbf{x}^T A \, \mathbf{x} = \sum_{i=1}^{n} \sum_{j=1}^{n} a_{ij} \, x_i \, x_j.
+$$
+
+For $n = 2$ with $A = \begin{pmatrix} a & b \\ b & c \end{pmatrix}$ (note symmetry forces $a_{12} = a_{21} = b$):
+
+$$
+Q(x_1, x_2) = a x_1^2 + 2b \, x_1 x_2 + c x_2^2.
+$$
+
+Quadratic forms are homogeneous polynomials of degree 2. They are the natural generalization of the squared norm $\|\mathbf{v}\|^2 = \langle \mathbf{v}, \mathbf{v} \rangle$ from inner product spaces, but without the requirement that $Q(\mathbf{v}) \geq 0$ for all $\mathbf{v}$.
+
+### The Polar Identity: Recovering the Bilinear Form
+
+A quadratic form $Q$ determines its parent symmetric bilinear form $B$ through the **polarization identity**:
+
+$$
+B(\mathbf{u}, \mathbf{v}) = \frac{1}{2}\bigl(Q(\mathbf{u} + \mathbf{v}) - Q(\mathbf{u}) - Q(\mathbf{v})\bigr).
+$$
+
+This works because expanding $Q(\mathbf{u} + \mathbf{v}) = B(\mathbf{u} + \mathbf{v}, \mathbf{u} + \mathbf{v}) = B(\mathbf{u}, \mathbf{u}) + 2B(\mathbf{u}, \mathbf{v}) + B(\mathbf{v}, \mathbf{v}) = Q(\mathbf{u}) + 2B(\mathbf{u}, \mathbf{v}) + Q(\mathbf{v})$, whence the formula follows by solving for $B(\mathbf{u}, \mathbf{v})$.
+
+The polar identity establishes a **bijective correspondence** between symmetric bilinear forms and quadratic forms (over fields of characteristic $\neq 2$). This means studying one is equivalent to studying the other. We freely pass between the two perspectives depending on which is more convenient.
+
+> **Warning**: Over fields of characteristic 2, the polar identity breaks down because $\frac{1}{2}$ does not exist. The theories of bilinear and quadratic forms diverge in that setting. For our purposes ($\mathbb{F} = \mathbb{R}$ or $\mathbb{C}$), this issue does not arise.
+
+## 5.4 Diagonalization and Sylvester's Law of Inertia
+
+### Diagonalizing a Quadratic Form
+
+A quadratic form $Q$ with matrix $A$ is said to be in **diagonal form** if $A$ is diagonal, meaning
+
+$$
+Q(\mathbf{x}) = d_1 x_1^2 + d_2 x_2^2 + \dots + d_n x_n^2
+$$
+
+with no cross terms $x_i x_j$ for $i \neq j$.
+
+**Theorem (Diagonalization of Quadratic Forms)**. Every real quadratic form can be brought to diagonal form by a suitable change of basis. That is, for any real symmetric matrix $A$, there exists an invertible matrix $P$ such that $P^T A P$ is diagonal.
+
+One method is to use the orthogonal diagonalization from Chapter 4: since $A$ is real symmetric, there exists an orthogonal matrix $P$ (i.e., $P^{-1} = P^T$) such that $P^T A P = D = \mathrm{diag}(\lambda_1, \dots, \lambda_n)$, where $\lambda_i$ are the eigenvalues. But we can also diagonalize by non-orthogonal changes of basis (a procedure sometimes called "completing the square"), which is more elementary and does not require eigenvalue computation.
+
+### Sylvester's Law of Inertia
+
+Once a quadratic form is diagonalized as $Q = d_1 x_1^2 + \dots + d_n x_n^2$, we can rescale each basis vector $\mathbf{e}_i \mapsto \frac{1}{\sqrt{|d_i|}} \mathbf{e}_i$ (for $d_i \neq 0$) to reduce each nonzero coefficient to $+1$ or $-1$. The result is a **canonical form**:
+
+$$
+Q = x_1^2 + \dots + x_p^2 - x_{p+1}^2 - \dots - x_{p+q}^2 + 0 \cdot x_{p+q+1}^2 + \dots + 0 \cdot x_n^2,
+$$
+
+where $p$ is the number of positive coefficients, $q$ the number of negative coefficients, and $z = n - p - q$ the number of zero coefficients.
+
+**Theorem (Sylvester's Law of Inertia)**. The triple $(p, q, z)$---called the **signature** of the quadratic form---is an invariant of the form. It does not depend on the choice of diagonalizing basis.
+
+This is a profound result. It says that no matter how you diagonalize a quadratic form---by completing the square, by orthogonal diagonalization, by any other invertible change of basis---you will always get the same number of positive, negative, and zero diagonal entries.
+
+The **rank** of the form is $r = p + q$ (the number of nonzero entries), and the **index** is sometimes taken to be $q$ (the number of negative entries).
+
+> **Philosophical Insight**: Sylvester's law of inertia tells us that the signature is a *topological* invariant of the quadratic form, in the sense that it is preserved under all continuous (indeed, all invertible linear) deformations of the basis. The positive and negative directions are intrinsically baked into the geometry of the form. No change of coordinates can convert a positive direction into a negative one.
+
+## 5.5 Positive Definite, Semi-Definite, and Indefinite Forms
+
+### The Classification by Signature
+
+The signature $(p, q, z)$ determines the **definiteness type** of the quadratic form:
+
+- **Positive definite**: $(n, 0, 0)$. Here $Q(\mathbf{v}) > 0$ for all $\mathbf{v} \neq \mathbf{0}$. The matrix $A$ has all positive eigenvalues. This is the case of an inner product.
+
+- **Negative definite**: $(0, n, 0)$. Here $Q(\mathbf{v}) < 0$ for all $\mathbf{v} \neq \mathbf{0}$. The matrix $A$ has all negative eigenvalues.
+
+- **Positive semi-definite**: $(p, 0, z)$ with $z > 0$. Here $Q(\mathbf{v}) \geq 0$ for all $\mathbf{v}$, but $Q(\mathbf{v}) = 0$ for some $\mathbf{v} \neq \mathbf{0}$.
+
+- **Negative semi-definite**: $(0, q, z)$ with $z > 0$. Here $Q(\mathbf{v}) \leq 0$ for all $\mathbf{v}$, with equality for some nonzero $\mathbf{v}$.
+
+- **Indefinite**: $p > 0$ and $q > 0$. Here $Q$ takes both positive and negative values. The set $\{\mathbf{v} : Q(\mathbf{v}) = 0\}$ is a cone (not just $\{\mathbf{0}\}$) that separates the regions of positivity and negativity.
+
+### Criteria for Positive Definiteness
+
+For a real symmetric matrix $A$, the following are equivalent:
+
+1. $A$ is positive definite (i.e., $\mathbf{x}^T A \mathbf{x} > 0$ for all $\mathbf{x} \neq \mathbf{0}$).
+2. All eigenvalues of $A$ are strictly positive.
+3. All **leading principal minors** of $A$ are strictly positive (Sylvester's criterion). That is, $\det(A_k) > 0$ for $k = 1, 2, \dots, n$, where $A_k$ is the upper-left $k \times k$ submatrix.
+4. There exists an invertible matrix $L$ such that $A = L^T L$ (Cholesky factorization).
+
+Sylvester's criterion provides a purely determinantal test for positive definiteness, avoiding eigenvalue computation entirely. For a $2 \times 2$ matrix $A = \begin{pmatrix} a & b \\ b & c \end{pmatrix}$, the criterion reduces to $a > 0$ and $ac - b^2 > 0$.
+
+### The Geometry of Level Sets
+
+The definiteness type profoundly affects the geometry of the level sets $\{Q(\mathbf{x}) = c\}$:
+
+- **Positive definite**: level sets are ellipsoids (bounded, closed).
+- **Indefinite, signature $(1,1,0)$ in $\mathbb{R}^2$**: level sets are hyperbolas.
+- **Semi-definite**: level sets degenerate into cylinders or planes.
+
+In higher dimensions, the same pattern persists: positive definite forms yield ellipsoids, indefinite forms yield hyperboloids of various types determined by the signature.
+
+## 5.6 Congruence of Matrices
+
+### The Equivalence Relation
+
+Two $n \times n$ matrices $A$ and $A'$ are **congruent** if there exists an invertible matrix $P$ such that $A' = P^T A P$. Congruence is an equivalence relation, and two matrices are congruent if and only if they represent the same bilinear form (or quadratic form) in different bases.
+
+Sylvester's law of inertia can be restated as: **every real symmetric matrix is congruent to a unique diagonal matrix of the form** $\mathrm{diag}(\underbrace{1, \dots, 1}_{p}, \underbrace{-1, \dots, -1}_{q}, \underbrace{0, \dots, 0}_{z})$.
+
+### Congruence vs. Similarity
+
+It is essential to distinguish congruence ($P^T A P$) from similarity ($P^{-1}AP$):
+
+| Property | Similarity | Congruence |
+|---|---|---|
+| Definition | $A' = P^{-1}AP$ | $A' = P^TAP$ |
+| Preserves | Eigenvalues, trace, determinant, rank | Signature, rank, definiteness |
+| Natural for | Linear maps $V \to V$ | Bilinear forms $V \times V \to \mathbb{F}$ |
+| Canonical form | Jordan normal form | Diagonal $\pm 1, 0$ (real symmetric) |
+
+When $P$ is orthogonal ($P^{-1} = P^T$), the two notions coincide. This is why the spectral theorem (Chapter 4) is so powerful: orthogonal diagonalization of a symmetric matrix is simultaneously a similarity transformation (revealing eigenvalues) and a congruence transformation (revealing signature).
+
+## 5.7 Classification over $\mathbb{R}$ and $\mathbb{C}$
+
+### Over the Reals
+
+Over $\mathbb{R}$, Sylvester's law gives a complete classification: two real symmetric matrices are congruent if and only if they have the same signature $(p, q, z)$. The number of distinct equivalence classes of $n \times n$ real symmetric matrices under congruence is the number of triples $(p, q, z)$ with $p + q + z = n$ and $p, q, z \geq 0$, which equals $\binom{n+2}{2}$.
+
+### Over the Complex Numbers
+
+Over $\mathbb{C}$, the classification is coarser. Since every nonzero complex number has a square root, we can always rescale diagonal entries to $+1$ (not just $\pm 1$). Therefore:
+
+**Theorem**. Every complex symmetric matrix is congruent over $\mathbb{C}$ to $\mathrm{diag}(\underbrace{1, \dots, 1}_{r}, \underbrace{0, \dots, 0}_{n-r})$, where $r$ is the rank.
+
+Over $\mathbb{C}$, the **only** invariant of a symmetric bilinear form under congruence is the rank. There is no notion of "positive" or "negative" because the complex numbers are not ordered. Two complex symmetric matrices are congruent if and only if they have the same rank.
+
+> **Deep Connection**: The dramatic difference between real and complex classification---signature matters over $\mathbb{R}$, only rank matters over $\mathbb{C}$---is a manifestation of the algebraic closure of $\mathbb{C}$. Over algebraically closed fields, the world of quadratic forms simplifies enormously. This is a recurring theme: algebraic closure "kills" arithmetic obstructions.
+
+## 5.8 Orthogonal Complements and Isotropic Subspaces
+
+### Orthogonality with Respect to a Bilinear Form
+
+Let $B$ be a symmetric bilinear form on $V$ (not necessarily positive definite). For a subspace $W \subseteq V$, the **orthogonal complement** of $W$ with respect to $B$ is
+
+$$
+W^\perp = \{\mathbf{v} \in V : B(\mathbf{v}, \mathbf{w}) = 0 \text{ for all } \mathbf{w} \in W\}.
+$$
+
+When $B$ is an inner product (positive definite), we recover the familiar orthogonal complement from Chapter 3, and we always have $V = W \oplus W^\perp$. But for general symmetric bilinear forms, pathologies arise: $W \cap W^\perp$ can be nonzero, and $W + W^\perp$ need not equal $V$.
+
+### The Radical
+
+The **radical** of $B$ is
+
+$$
+\mathrm{rad}(B) = V^\perp = \{\mathbf{v} \in V : B(\mathbf{v}, \mathbf{w}) = 0 \text{ for all } \mathbf{w} \in V\}.
+$$
+
+The radical consists of all vectors that are $B$-orthogonal to the entire space. Equivalently, $\mathrm{rad}(B) = \ker(A)$ where $A$ is the matrix of $B$. The form $B$ is called **nondegenerate** if $\mathrm{rad}(B) = \{\mathbf{0}\}$, which is equivalent to $A$ being invertible.
+
+For nondegenerate forms, $\dim(W) + \dim(W^\perp) = \dim(V)$ still holds, even though $W \cap W^\perp$ may be nonzero.
+
+### Isotropic Vectors and Subspaces
+
+A nonzero vector $\mathbf{v}$ is called **isotropic** if $B(\mathbf{v}, \mathbf{v}) = Q(\mathbf{v}) = 0$. An isotropic vector has "zero length" even though it is nonzero---this cannot happen in a positive definite setting, but it is a central phenomenon for indefinite forms.
+
+A subspace $W$ is called **totally isotropic** if $B(\mathbf{u}, \mathbf{v}) = 0$ for all $\mathbf{u}, \mathbf{v} \in W$, meaning $W \subseteq W^\perp$. The maximum dimension of a totally isotropic subspace for a form of signature $(p, q, 0)$ is $\min(p, q)$---this is the **Witt index**.
+
+**Example**: In $\mathbb{R}^2$ with the indefinite form $Q(x_1, x_2) = x_1^2 - x_2^2$ (signature $(1,1,0)$), the isotropic vectors lie on the "light cone" $x_1 = \pm x_2$. The one-dimensional subspaces spanned by $(1, 1)$ and $(1, -1)$ are totally isotropic.
+
+> **Philosophical Insight**: Isotropic subspaces are where the geometry of the form degenerates. They are the locus where the distinction between "positive" and "negative" dissolves. In physics, these are the directions of light rays. In algebraic geometry, they form the variety defined by the quadratic equation $Q = 0$. Their study connects bilinear algebra to projective geometry, algebraic geometry, and the theory of quadrics.
+
+## 5.9 Metric Tensors: A Preview
+
+### From Bilinear Forms to Riemannian Geometry
+
+A **metric tensor** on a smooth manifold $M$ is a smooth assignment of a symmetric bilinear form $g_p : T_pM \times T_pM \to \mathbb{R}$ to each tangent space $T_pM$. When $g_p$ is positive definite at every point, we have a **Riemannian metric**; when $g_p$ has signature $(n-1, 1, 0)$, we have a **Lorentzian metric** (the geometry of spacetime).
+
+In local coordinates $(x^1, \dots, x^n)$, the metric tensor is specified by its components
+
+$$
+g_{ij}(x) = g\!\left(\frac{\partial}{\partial x^i}, \frac{\partial}{\partial x^j}\right),
+$$
+
+forming a symmetric matrix $[g_{ij}]$ that varies smoothly from point to point. The entire edifice of differential geometry---lengths of curves, angles between tangent vectors, curvature, geodesics---derives from this matrix-valued function.
+
+### The Sheaf-Theoretic Viewpoint
+
+From the perspective we are building toward, a Riemannian metric is a global section of the sheaf of symmetric $(0,2)$-tensor fields on $M$. The local-to-global behavior of this sheaf---how local metrics patch together, when global metrics exist, what obstructions prevent their existence---is a quintessential sheaf-theoretic question.
+
+The bilinear forms we study in this chapter are the "pointwise" or "fiber-level" story: they describe what happens at a single point of the manifold, in a single tangent space. The transition to sheaf theory happens when we ask how these pointwise forms vary as we move from point to point, and how the resulting structure respects the topology of the manifold.
+
+## 5.10 Applications
+
+### The Hessian Matrix in Optimization
+
+Let $f : \mathbb{R}^n \to \mathbb{R}$ be a twice-differentiable function and let $\mathbf{a}$ be a critical point ($\nabla f(\mathbf{a}) = \mathbf{0}$). The second-order Taylor expansion about $\mathbf{a}$ is
+
+$$
+f(\mathbf{a} + \mathbf{h}) \approx f(\mathbf{a}) + \frac{1}{2} \mathbf{h}^T H(\mathbf{a}) \, \mathbf{h},
+$$
+
+where $H(\mathbf{a}) = \left[\frac{\partial^2 f}{\partial x_i \partial x_j}(\mathbf{a})\right]$ is the **Hessian matrix** at $\mathbf{a}$.
+
+The Hessian is symmetric (by equality of mixed partials), and its associated quadratic form $Q(\mathbf{h}) = \mathbf{h}^T H \mathbf{h}$ determines the local behavior of $f$ near $\mathbf{a}$:
+
+- **$H$ positive definite** $\implies$ $\mathbf{a}$ is a local minimum.
+- **$H$ negative definite** $\implies$ $\mathbf{a}$ is a local maximum.
+- **$H$ indefinite** $\implies$ $\mathbf{a}$ is a saddle point.
+- **$H$ semi-definite** $\implies$ the test is inconclusive; higher-order terms are needed.
+
+This is the **second derivative test** from multivariable calculus, now revealed as a direct application of the definiteness classification. The eigenvalues of $H$ are the principal curvatures of the graph of $f$ at $\mathbf{a}$, and the eigenvectors are the principal directions.
+
+### The Lorentz Metric in Special Relativity
+
+In Minkowski spacetime $\mathbb{R}^{3,1}$, the fundamental bilinear form is
+
+$$
+\eta(\mathbf{u}, \mathbf{v}) = -u_0 v_0 + u_1 v_1 + u_2 v_2 + u_3 v_3,
+$$
+
+with matrix $\eta = \mathrm{diag}(-1, +1, +1, +1)$ (in the $(-,+,+,+)$ convention). The signature is $(3, 1, 0)$.
+
+This is an indefinite form. The squared "length" of a spacetime vector $\mathbf{v}$ is
+
+$$
+\eta(\mathbf{v}, \mathbf{v}) = -v_0^2 + v_1^2 + v_2^2 + v_3^2,
+$$
+
+which can be positive (spacelike), negative (timelike), or zero (lightlike/null). The set of null vectors---the **light cone** $\{v_0^2 = v_1^2 + v_2^2 + v_3^2\}$---is precisely the isotropic cone of the Lorentz form.
+
+The Lorentz group $O(3,1)$, the group of linear transformations preserving $\eta$, replaces the orthogonal group $O(n)$ as the symmetry group of spacetime. Lorentz transformations include spatial rotations and Lorentz boosts (the relativistic analogue of changes in velocity). The entire structure of special relativity---time dilation, length contraction, the invariance of the speed of light---follows from the algebraic properties of this single indefinite bilinear form.
+
+### Quadratic Forms in Number Theory
+
+Though outside our main development, it is worth noting that the theory of quadratic forms over $\mathbb{Z}$ (integer-valued quadratic forms) is one of the deepest parts of number theory. Questions like "which integers can be represented as $x^2 + y^2$?" or "as $x^2 + y^2 + z^2$?" are questions about the values taken by specific quadratic forms. Gauss's *Disquisitiones Arithmeticae* (1801) developed the theory of binary quadratic forms into a foundational pillar of modern algebra.
+
+## 5.11 Completing the Square: A Constructive Method
+
+### The Algorithm
+
+We present the method of **completing the square** as a constructive proof that every quadratic form can be diagonalized. Consider the quadratic form in $\mathbb{R}^3$:
+
+$$
+Q(x_1, x_2, x_3) = 2x_1^2 + 4x_1 x_2 - 2x_1 x_3 + x_2^2 + x_3^2.
+$$
+
+**Step 1**: Collect all terms involving $x_1$ and complete the square:
+
+$$
+Q = 2\!\left(x_1^2 + 2x_1 x_2 - x_1 x_3\right) + x_2^2 + x_3^2 = 2\!\left(x_1 + x_2 - \frac{1}{2}x_3\right)^{\!2} - 2x_2^2 + 2x_2 x_3 - \frac{1}{2}x_3^2 + x_2^2 + x_3^2.
+$$
+
+Simplifying:
+
+$$
+Q = 2\!\left(x_1 + x_2 - \tfrac{1}{2}x_3\right)^{\!2} - x_2^2 + 2x_2 x_3 + \tfrac{1}{2}x_3^2.
+$$
+
+**Step 2**: In the remaining terms, complete the square in $x_2$:
+
+$$
+-x_2^2 + 2x_2 x_3 + \tfrac{1}{2}x_3^2 = -(x_2 - x_3)^2 + x_3^2 + \tfrac{1}{2}x_3^2 = -(x_2 - x_3)^2 + \tfrac{3}{2}x_3^2.
+$$
+
+**Step 3**: Introduce new variables $y_1 = x_1 + x_2 - \tfrac{1}{2}x_3$, $y_2 = x_2 - x_3$, $y_3 = x_3$. Then:
+
+$$
+Q = 2y_1^2 - y_2^2 + \tfrac{3}{2}y_3^2.
+$$
+
+The form is now diagonal with coefficients $2, -1, \frac{3}{2}$. The signature is $(2, 1, 0)$: the form is indefinite. After further rescaling, we obtain the canonical form $z_1^2 + z_3^2 - z_2^2$.
+
+### General Principle
+
+The method of completing the square always terminates and always produces a diagonal form. At each step, we eliminate the cross terms involving one variable by absorbing them into a perfect square. The process is constructive and gives an explicit change-of-basis matrix $P$.
+
+## 5.12 Simultaneous Diagonalization of Two Quadratic Forms
+
+### The Pencil of Forms
+
+Given two symmetric bilinear forms $B_1$ and $B_2$ on $V$ (with matrices $A_1$ and $A_2$), the **pencil** is the one-parameter family
+
+$$
+B_\lambda = B_1 - \lambda B_2, \qquad \text{equivalently } A_1 - \lambda A_2.
+$$
+
+When $B_2$ is positive definite, the generalized eigenvalue problem $A_1 \mathbf{v} = \lambda A_2 \mathbf{v}$ has real eigenvalues $\lambda_1, \dots, \lambda_n$, and there exists an invertible $P$ such that $P^T A_1 P$ and $P^T A_2 P$ are simultaneously diagonal. This is the **simultaneous diagonalization** of two quadratic forms, and it reduces to the ordinary eigenvalue problem for the matrix $A_2^{-1} A_1$.
+
+This technique is fundamental in mechanics (diagonalizing kinetic and potential energy simultaneously), in statistics (canonical correlation analysis), and in the theory of vibrations (normal modes).
+
+## Interactive Visualizations
+
+The following interactive simulation allows you to explore bilinear forms, quadratic forms, and their classification directly. You can manipulate the entries of a $2 \times 2$ symmetric matrix and observe how the associated bilinear form, quadratic form, and level curves change in real time.
+
+### Bilinear Form Mode
+
+In **bilinear** mode, you can see how the bilinear form $B(\mathbf{u}, \mathbf{v}) = \mathbf{u}^T A \mathbf{v}$ evaluates for different pairs of vectors. Drag the vectors and modify the matrix entries to observe how the scalar output changes with the geometry.
+
+<BilinearFormSim mode="bilinear" />
+
+### Quadratic Form Mode
+
+In **quadratic** mode, the visualization displays the surface $z = Q(x, y) = \mathbf{x}^T A \mathbf{x}$ and its level curves. Positive definite forms produce elliptic paraboloids opening upward; negative definite forms produce paraboloids opening downward; indefinite forms produce hyperbolic paraboloids (saddle surfaces). Observe how the eigenvalues of $A$ determine the principal curvatures.
+
+<BilinearFormSim mode="quadratic" />
+
+### Classification Mode
+
+In **classification** mode, you can adjust the matrix and watch the signature $(p, q, z)$ update in real time. The level curves morph between ellipses, hyperbolas, parallel lines, and degenerate configurations as the definiteness type changes. Pay particular attention to the transition from definite to indefinite: the moment an eigenvalue crosses zero, the topology of the level curves undergoes a qualitative change.
+
+<BilinearFormSim mode="classification" />
+
+> **Exploration Suggestion**: In classification mode, start with a positive definite matrix (e.g., $a = 2, b = 0, c = 1$) and slowly decrease $c$ toward zero and then into negative values. Watch the elliptical level curves flatten, degenerate into parallel lines at the semi-definite boundary, and then open into hyperbolas as the form becomes indefinite. This visual transition is a concrete manifestation of Sylvester's signature changing from $(2,0,0)$ to $(1,0,1)$ to $(1,1,0)$.
+
+## Why This Matters for Reaching Sheaf Theory
+
+The theory of bilinear and quadratic forms is not a detour on the way to sheaf theory---it is an essential prerequisite, for several interconnected reasons.
+
+**First**, metric tensors on manifolds are, pointwise, exactly the symmetric bilinear forms studied in this chapter. Understanding the classification of forms (signature, definiteness, degeneracy) is understanding the local data that a Riemannian or pseudo-Riemannian metric encodes. When we eventually define the sheaf of metric tensors, each stalk will contain objects we have classified here.
+
+**Second**, the concept of **nondegeneracy** reappears throughout homological algebra and sheaf theory. A nondegenerate bilinear form on a vector space establishes an isomorphism between $V$ and its dual $V^*$. This duality is the prototype of Poincare duality in cohomology, Serre duality in algebraic geometry, and various duality theorems in sheaf cohomology. Understanding when and why a form can be degenerate prepares us for the subtleties of these deeper dualities.
+
+**Third**, the **orthogonal complement** operation with respect to a bilinear form is a precursor to the orthogonal complement operations in Hodge theory (on differential forms) and in the theory of perverse sheaves. The behavior of $W \cap W^\perp$ for indefinite forms---which can be nontrivial, unlike the positive definite case---foreshadows the subtleties of these advanced constructions.
+
+**Fourth**, the **congruence** equivalence relation on matrices is the simplest example of an equivalence relation defined by a group action on a set of algebraic objects. The passage from individual matrices to equivalence classes under congruence is a microcosm of the passage from local data to sheaf-theoretic invariants: we identify objects that "look the same" from different vantage points (bases) and ask what intrinsic structure remains. This is the essence of descent theory and the gluing axiom for sheaves.
+
+**Fifth**, the study of **isotropic subspaces** and the Witt index leads directly to the theory of **Lagrangian subspaces** in symplectic geometry, which is the geometric framework underlying Hamiltonian mechanics and quantization. Symplectic manifolds carry their own sheaves of functions and forms, and the interplay between isotropic and Lagrangian geometry is a major theme in modern mathematical physics.
+
+## What to Carry Forward
+
+As you proceed to the chapters on multilinear algebra, differential forms, and eventually sheaves, keep the following ideas from this chapter close at hand:
+
+1. **Bilinear forms generalize inner products** by dropping positive definiteness. The resulting theory is richer, not weaker: indefinite forms describe geometries (Lorentzian, symplectic) that positive definite forms cannot.
+
+2. **The signature $(p, q, z)$ is the fundamental invariant** of a real quadratic form. It is preserved under all invertible changes of basis and determines the qualitative geometry (definite, semi-definite, indefinite).
+
+3. **Congruence $P^TAP$ is the correct equivalence** for bilinear forms, distinct from similarity $P^{-1}AP$ for linear maps. The two coincide for orthogonal $P$, which is why the spectral theorem is so central.
+
+4. **Nondegeneracy establishes a duality** between $V$ and $V^*$. This is the linear-algebraic root of all the duality theorems in topology, geometry, and algebra.
+
+5. **Isotropic subspaces** are where the form degenerates. They define cones, light cones, and Lagrangian submanifolds---objects of central importance in geometry and physics.
+
+6. **The Hessian is a quadratic form** encoding the local curvature of a function. Its signature classifies critical points. This is the bridge from bilinear algebra to calculus, analysis, and optimization.
+
+7. **Metric tensors are smoothly varying bilinear forms**. The passage from a single bilinear form (this chapter) to a field of bilinear forms on a manifold (Riemannian geometry) is the passage from algebra to geometry---and from stalks to sheaves.
+
+> **Final Reflection**: The theory of bilinear and quadratic forms stands at a remarkable crossroads of mathematics. It connects to linear algebra (matrix classification), analysis (optimization and the second derivative test), differential geometry (metric tensors and curvature), mathematical physics (the Lorentz metric and symplectic structures), number theory (representation of integers by forms), and algebraic geometry (quadrics and isotropic varieties). Every one of these threads will reappear, in some form, as we ascend toward the unified language of sheaves.

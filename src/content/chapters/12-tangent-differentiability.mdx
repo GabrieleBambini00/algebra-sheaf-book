@@ -1,0 +1,431 @@
+# Chapter 12: Tangent Fields, Differentiability, and Local Structures
+
+In Chapter 11, we introduced smooth manifolds as topological spaces equipped with atlases of coordinate charts — local homeomorphisms to $\mathbb{R}^n$ whose transition functions are smooth. This formalism allowed us to speak of "locally Euclidean" geometry in a coordinate-independent way. But a manifold by itself is a static object: it is a space on which points live, but we have not yet said what it means to do *calculus* on it. We cannot differentiate a function on a manifold by appealing to limits of difference quotients, because the manifold has no preferred linear structure — there is no intrinsic notion of "subtracting two points" or "dividing by a scalar displacement."
+
+The resolution of this difficulty is one of the great conceptual achievements of modern geometry. Rather than attempting to import the full apparatus of Euclidean calculus onto a curved space, we construct, at each point $p$ of the manifold $M$, a *linear approximation* to $M$ — a vector space $T_pM$ called the **tangent space** — and we perform calculus in these tangent spaces. The tangent space at $p$ captures all possible "infinitesimal directions of motion" through $p$. A smooth map between manifolds induces, at each point, a linear map between tangent spaces — the **differential** — and this linear map is the correct generalization of the derivative.
+
+This chapter develops the full differential calculus on manifolds: tangent vectors and tangent spaces, the differential of a smooth map, vector fields and their algebraic structure, the dual notion of covectors and differential forms, the exterior derivative that generalizes the classical gradient, curl, and divergence, and a first glimpse of de Rham cohomology. Every one of these constructions will be essential for the final chapters of this book, where we show that differential forms constitute a sheaf, and that de Rham cohomology is a particular instance of sheaf cohomology.
+
+> **Philosophical Insight**: The passage from manifolds to tangent spaces is the passage from *geometry* to *linear algebra at a point*. Every deep theorem about manifolds ultimately reduces to a statement about linear maps between tangent spaces — which is to say, a statement about matrices. The entire theory of calculus on manifolds is, at its heart, the theory of how to do linear algebra *coherently across a family of vector spaces parametrized by a curved space*. This is exactly the structure that sheaf theory was designed to capture.
+
+## Guiding Idea of the Chapter
+
+The central thesis of this chapter is that **calculus on manifolds is local linear algebra**. More precisely:
+
+1. At each point $p \in M$, there is a vector space $T_pM$ of dimension $\dim M$ that encodes infinitesimal geometry.
+2. A smooth map $f: M \to N$ induces, at each point, a linear map $df_p: T_pM \to T_{f(p)}N$ — the differential — that captures the local linear behavior of $f$.
+3. A vector field on $M$ is a smooth choice of tangent vector at every point — a *section* of a certain bundle. Vector fields form a Lie algebra under the bracket operation.
+4. The dual construction — covectors and differential forms — provides the correct language for integration. Differential forms can be pulled back, differentiated (via the exterior derivative), and integrated over oriented submanifolds.
+5. The exterior derivative satisfies $d \circ d = 0$, giving rise to a cochain complex whose cohomology — de Rham cohomology — is a topological invariant of $M$.
+
+Each of these statements connects directly to the algebraic structures developed in earlier chapters. The tangent spaces are the vector spaces of Chapter 1. The differential is a linear map, studied in Chapter 2. The cochain complex of differential forms is a chain complex in the sense of Chapter 6. And the assignment $U \mapsto \Omega^k(U)$ of $k$-forms on open subsets is a sheaf in the sense of Chapter 4. This chapter is where geometry, algebra, and topology converge.
+
+## 12.1 Tangent Vectors: Derivations at a Point
+
+Let $M$ be a smooth manifold of dimension $n$, and let $p \in M$. We wish to define what a "tangent vector at $p$" is, without reference to any ambient Euclidean space in which $M$ might be embedded.
+
+The key insight is that a tangent vector should be determined by what it does to smooth functions. If $v$ is a tangent vector at $p$, and $f: M \to \mathbb{R}$ is a smooth function, then the "directional derivative of $f$ in the direction $v$" should be a well-defined real number $v(f)$. This action of $v$ on smooth functions characterizes $v$ completely.
+
+**Definition.** Let $C^\infty(M)$ denote the algebra of smooth real-valued functions on $M$. A **derivation at $p$** is a linear map $v: C^\infty(M) \to \mathbb{R}$ satisfying the **Leibniz rule**:
+
+$$v(fg) = f(p) \cdot v(g) + g(p) \cdot v(f) \quad \text{for all } f, g \in C^\infty(M).$$
+
+The set of all derivations at $p$ is denoted $T_pM$ and called the **tangent space** of $M$ at $p$.
+
+This definition is elegant and coordinate-free. A tangent vector is not a "little arrow" at $p$ (though that picture is useful for intuition); it is a rule for differentiating functions at $p$, subject to linearity and the product rule.
+
+**Example.** Let $M = \mathbb{R}^n$ and $p = (a_1, \ldots, a_n)$. For each $i = 1, \ldots, n$, the partial derivative operator
+
+$$\left.\frac{\partial}{\partial x^i}\right|_p : f \mapsto \frac{\partial f}{\partial x^i}(p)$$
+
+is a derivation at $p$. It is linear (the partial derivative of a sum is the sum of partial derivatives) and satisfies the Leibniz rule (the product rule for partial derivatives). These $n$ derivations form a basis for $T_pM$, so every tangent vector at $p$ can be written as
+
+$$v = \sum_{i=1}^n v^i \left.\frac{\partial}{\partial x^i}\right|_p$$
+
+for unique scalars $v^1, \ldots, v^n \in \mathbb{R}$.
+
+> **Insight**: The identification of tangent vectors with derivations is a shift from geometry to algebra. Instead of defining a tangent vector as an equivalence class of curves (a valid but less algebraic approach), we define it as an operator on functions. This algebraic characterization generalizes immediately to settings where curves may not be available — for instance, to algebraic varieties over fields other than $\mathbb{R}$, or to supermanifolds — and it connects directly to the sheaf-theoretic viewpoint, where everything is described in terms of sections of bundles and their local properties.
+
+## 12.2 The Tangent Space $T_pM$
+
+We now establish the fundamental properties of the tangent space.
+
+**Theorem.** Let $M$ be a smooth $n$-dimensional manifold and $p \in M$. Then:
+
+1. $T_pM$ is a real vector space of dimension $n$.
+2. If $(U, \varphi)$ is a chart around $p$ with local coordinates $(x^1, \ldots, x^n)$, then the coordinate derivations $\left.\frac{\partial}{\partial x^1}\right|_p, \ldots, \left.\frac{\partial}{\partial x^n}\right|_p$ form a basis for $T_pM$.
+3. If $(V, \psi)$ is another chart around $p$ with local coordinates $(y^1, \ldots, y^n)$, then the two bases are related by the Jacobian of the transition map:
+
+$$\left.\frac{\partial}{\partial y^j}\right|_p = \sum_{i=1}^n \frac{\partial x^i}{\partial y^j}(p) \left.\frac{\partial}{\partial x^i}\right|_p.$$
+
+The proof of (1) and (2) uses the fact that any derivation at $p$ is determined by its action on the coordinate functions $x^i$, together with the fact that any smooth function can be written locally as a Taylor expansion. The proof of (3) is the chain rule, applied to the transition map $\varphi \circ \psi^{-1}$.
+
+**The tangent bundle.** As $p$ varies over $M$, the tangent spaces $T_pM$ assemble into a single object:
+
+$$TM = \bigsqcup_{p \in M} T_pM = \{(p, v) : p \in M, \, v \in T_pM\}.$$
+
+This is the **tangent bundle** of $M$. It carries a natural smooth manifold structure of dimension $2n$ (the $n$ coordinates of $p$ plus the $n$ components of $v$), and the projection map $\pi: TM \to M$ sending $(p, v)$ to $p$ is a smooth surjection. The tangent bundle is the prototypical example of a **vector bundle** — a smooth family of vector spaces parametrized by a manifold.
+
+> **Insight**: The tangent bundle $TM$ is an instance of the kind of structure that sheaf theory handles naturally. Over each open set $U \subseteq M$, we have the space of smooth sections of $TM|_U$ — that is, the vector fields on $U$. These spaces satisfy the gluing axiom: a vector field defined consistently on overlapping open sets extends to a vector field on the union. In the language of Chapter 4, the assignment $U \mapsto \Gamma(U, TM)$ is a sheaf.
+
+## 12.3 The Differential of a Smooth Map
+
+Let $f: M \to N$ be a smooth map between manifolds. At each point $p \in M$, we define a linear map $df_p: T_pM \to T_{f(p)}N$ that captures the "best linear approximation" to $f$ near $p$.
+
+**Definition.** The **differential** (or **pushforward**) of $f$ at $p$ is the linear map $df_p: T_pM \to T_{f(p)}N$ defined by:
+
+$$(df_p(v))(g) = v(g \circ f) \quad \text{for all } v \in T_pM, \, g \in C^\infty(N).$$
+
+In words: to apply $df_p(v)$ to a smooth function $g$ on $N$, we first compose $g$ with $f$ to obtain a smooth function $g \circ f$ on $M$, then apply the derivation $v$.
+
+**Verification.** We must check that $df_p(v)$ is indeed a derivation at $f(p)$. Linearity in $g$ follows from the linearity of $v$. The Leibniz rule:
+
+$$df_p(v)(g_1 g_2) = v((g_1 g_2) \circ f) = v((g_1 \circ f)(g_2 \circ f)) = (g_1 \circ f)(p) \cdot v(g_2 \circ f) + (g_2 \circ f)(p) \cdot v(g_1 \circ f)$$
+
+$$= g_1(f(p)) \cdot df_p(v)(g_2) + g_2(f(p)) \cdot df_p(v)(g_1).$$
+
+**In coordinates.** If $\varphi = (x^1, \ldots, x^m)$ are local coordinates on $M$ near $p$, and $\psi = (y^1, \ldots, y^n)$ are local coordinates on $N$ near $f(p)$, then the differential is represented by the **Jacobian matrix**:
+
+$$df_p\left(\left.\frac{\partial}{\partial x^i}\right|_p\right) = \sum_{j=1}^n \frac{\partial (y^j \circ f)}{\partial x^i}(p) \left.\frac{\partial}{\partial y^j}\right|_{f(p)}.$$
+
+Thus the matrix of $df_p$ with respect to the coordinate bases is the classical Jacobian $\left(\frac{\partial f^j}{\partial x^i}(p)\right)$, where $f^j = y^j \circ f$ are the component functions of $f$ in coordinates.
+
+**Chain rule.** If $f: M \to N$ and $g: N \to P$ are smooth maps, then:
+
+$$d(g \circ f)_p = dg_{f(p)} \circ df_p.$$
+
+This is the global, coordinate-free form of the chain rule. It says that the differential of a composition is the composition of the differentials — a statement that is entirely natural once one recognizes that the differential is a functor from the category of smooth manifolds to the category of vector spaces.
+
+## 12.4 Vector Fields as Sections of the Tangent Bundle
+
+A tangent vector at a single point is the infinitesimal analogue of a velocity. A **vector field** is a smooth assignment of a tangent vector to every point of the manifold — the infinitesimal analogue of a flow.
+
+**Definition.** A **smooth vector field** on $M$ is a smooth section of the tangent bundle $\pi: TM \to M$, that is, a smooth map $X: M \to TM$ such that $\pi \circ X = \operatorname{id}_M$. Equivalently, $X$ assigns to each $p \in M$ a tangent vector $X_p \in T_pM$, and the assignment is smooth in the sense that the component functions $X^i(p)$ in any local coordinate system are smooth functions.
+
+The set of all smooth vector fields on $M$ is denoted $\mathfrak{X}(M)$. It is a real vector space under pointwise addition and scalar multiplication, and a module over the ring $C^\infty(M)$ under pointwise multiplication by smooth functions:
+
+$$(fX)_p = f(p) \cdot X_p \quad \text{for } f \in C^\infty(M), \, X \in \mathfrak{X}(M).$$
+
+In local coordinates $(x^1, \ldots, x^n)$ on an open set $U$, every vector field can be written:
+
+$$X = \sum_{i=1}^n X^i \frac{\partial}{\partial x^i}$$
+
+where $X^i: U \to \mathbb{R}$ are smooth functions called the **component functions** of $X$.
+
+**Vector fields as derivations of $C^\infty(M)$.** A vector field $X$ acts on smooth functions by differentiation:
+
+$$(X(f))(p) = X_p(f) \quad \text{for } f \in C^\infty(M).$$
+
+This defines a map $X: C^\infty(M) \to C^\infty(M)$ that is $\mathbb{R}$-linear and satisfies the Leibniz rule $X(fg) = fX(g) + gX(f)$. Conversely, every such derivation of $C^\infty(M)$ arises from a unique smooth vector field. This establishes an isomorphism between $\mathfrak{X}(M)$ and the space of $\mathbb{R}$-linear derivations of the algebra $C^\infty(M)$.
+
+## 12.5 The Lie Bracket
+
+Given two vector fields $X$ and $Y$ on $M$, we can compose them as operators on smooth functions: $X \circ Y$ sends $f$ to $X(Y(f))$. However, the composition $X \circ Y$ is *not* a vector field — it involves second-order derivatives and violates the Leibniz rule. The remarkable fact is that the *commutator* $X \circ Y - Y \circ X$ *is* a vector field.
+
+**Definition.** The **Lie bracket** of two vector fields $X, Y \in \mathfrak{X}(M)$ is the vector field $[X, Y]$ defined by:
+
+$$[X, Y](f) = X(Y(f)) - Y(X(f)) \quad \text{for all } f \in C^\infty(M).$$
+
+**Proposition.** The Lie bracket $[X, Y]$ is a derivation of $C^\infty(M)$ and hence corresponds to a smooth vector field. In local coordinates, if $X = \sum_i X^i \partial_i$ and $Y = \sum_j Y^j \partial_j$, then:
+
+$$[X, Y] = \sum_{k=1}^n \left(\sum_{i=1}^n X^i \frac{\partial Y^k}{\partial x^i} - Y^i \frac{\partial X^k}{\partial x^i}\right) \frac{\partial}{\partial x^k}.$$
+
+The Lie bracket satisfies three fundamental properties:
+
+1. **Bilinearity**: $[aX + bY, Z] = a[X, Z] + b[Y, Z]$ for $a, b \in \mathbb{R}$.
+2. **Antisymmetry**: $[X, Y] = -[Y, X]$.
+3. **Jacobi identity**: $[X, [Y, Z]] + [Y, [Z, X]] + [Z, [X, Y]] = 0$.
+
+These are precisely the axioms of a **Lie algebra**. Thus $(\mathfrak{X}(M), [\cdot, \cdot])$ is an infinite-dimensional Lie algebra — one of the central objects in differential geometry, mathematical physics, and the theory of symmetry.
+
+> **Insight**: The Lie bracket measures the failure of two flows to commute. If $\Phi^X_t$ and $\Phi^Y_s$ are the flows generated by $X$ and $Y$ respectively, then $[X, Y]_p$ measures, to first order, the gap that opens when you flow along $X$, then $Y$, versus flowing along $Y$, then $X$. This "infinitesimal non-commutativity" is the geometric content of the Lie bracket, and it connects to the curvature of connections and the structure of Lie groups.
+
+## 12.6 The Cotangent Space and Covector Fields
+
+Every vector space has a dual, and the tangent space is no exception.
+
+**Definition.** The **cotangent space** at $p \in M$ is the dual vector space:
+
+$$T_p^*M = (T_pM)^* = \operatorname{Hom}(T_pM, \mathbb{R}).$$
+
+An element $\omega \in T_p^*M$ is called a **covector** (or **cotangent vector**) at $p$. It is a linear functional that eats a tangent vector and returns a real number.
+
+**The differential of a function.** If $f \in C^\infty(M)$, then at each point $p$, the map
+
+$$df_p: T_pM \to \mathbb{R}, \quad df_p(v) = v(f)$$
+
+is a covector at $p$. (This is the special case of the differential from Section 12.3, applied to the map $f: M \to \mathbb{R}$.) In local coordinates, the differentials of the coordinate functions $dx^1|_p, \ldots, dx^n|_p$ form the basis of $T_p^*M$ dual to $\frac{\partial}{\partial x^1}|_p, \ldots, \frac{\partial}{\partial x^n}|_p$:
+
+$$dx^i\left(\frac{\partial}{\partial x^j}\right) = \delta^i_j = \begin{cases} 1 & \text{if } i = j, \\ 0 & \text{if } i \neq j. \end{cases}$$
+
+Every covector at $p$ can be written $\omega = \sum_i \omega_i \, dx^i|_p$ for unique scalars $\omega_i$. Note the placement of indices: tangent vectors carry *upper* indices ($v^i$), covectors carry *lower* indices ($\omega_i$). This **Einstein index convention** reflects the functorial duality between vectors and covectors.
+
+**The cotangent bundle and 1-forms.** The cotangent spaces assemble into the **cotangent bundle**:
+
+$$T^*M = \bigsqcup_{p \in M} T_p^*M.$$
+
+A smooth section of $T^*M$ is called a **1-form** (or **covector field**): it assigns to each point $p$ a covector $\omega_p \in T_p^*M$, smoothly in $p$. The space of all smooth 1-forms is denoted $\Omega^1(M)$. In local coordinates:
+
+$$\omega = \sum_{i=1}^n \omega_i(x) \, dx^i$$
+
+where $\omega_i: U \to \mathbb{R}$ are smooth functions.
+
+## 12.7 Differential Forms: 1-Forms, $k$-Forms
+
+The covectors at a point are linear functionals on the tangent space. To build objects that can be integrated over $k$-dimensional submanifolds, we need *multilinear* functionals — and specifically, *alternating* multilinear functionals. This leads to the theory of differential forms.
+
+**Definition.** A **$k$-form** (or **differential form of degree $k$**) on $M$ is a smooth section of the bundle $\Lambda^k T^*M$ — the $k$-th exterior power of the cotangent bundle. Concretely, a $k$-form $\omega$ assigns to each point $p \in M$ an alternating $k$-linear map:
+
+$$\omega_p: \underbrace{T_pM \times \cdots \times T_pM}_{k \text{ times}} \to \mathbb{R}$$
+
+and this assignment is smooth in $p$. The space of all smooth $k$-forms on $M$ is denoted $\Omega^k(M)$.
+
+**Special cases:**
+- $\Omega^0(M) = C^\infty(M)$ (smooth functions are 0-forms).
+- $\Omega^1(M)$ consists of the 1-forms already introduced.
+- $\Omega^n(M)$, where $n = \dim M$, consists of "top-degree forms" — these are the objects that can be integrated over $M$ itself.
+- $\Omega^k(M) = 0$ for $k > n$ (there are no non-trivial alternating $(n+1)$-linear forms on an $n$-dimensional space).
+
+**In local coordinates.** On a coordinate chart $(U, x^1, \ldots, x^n)$, every $k$-form can be written:
+
+$$\omega = \sum_{i_1 < i_2 < \cdots < i_k} \omega_{i_1 \cdots i_k}(x) \, dx^{i_1} \wedge dx^{i_2} \wedge \cdots \wedge dx^{i_k}$$
+
+where the $\omega_{i_1 \cdots i_k}$ are smooth functions and $\wedge$ denotes the **wedge product** (exterior product). The wedge product is associative, bilinear, and satisfies the **graded antisymmetry**:
+
+$$dx^i \wedge dx^j = -dx^j \wedge dx^i.$$
+
+In particular, $dx^i \wedge dx^i = 0$. The number of independent $k$-forms on an $n$-dimensional manifold at each point is $\binom{n}{k}$, which agrees with the dimension of $\Lambda^k(\mathbb{R}^n)^*$.
+
+**The wedge product of forms.** Given a $k$-form $\alpha$ and an $\ell$-form $\beta$, their wedge product $\alpha \wedge \beta$ is a $(k + \ell)$-form. The wedge product satisfies:
+
+$$\alpha \wedge \beta = (-1)^{k\ell} \, \beta \wedge \alpha.$$
+
+This makes the direct sum $\Omega^*(M) = \bigoplus_{k=0}^n \Omega^k(M)$ into a **graded algebra** — the **exterior algebra of differential forms** on $M$.
+
+> **Insight**: Differential forms are the natural objects to integrate. A 1-form can be integrated along a curve, a 2-form over a surface, a $k$-form over a $k$-dimensional submanifold. The alternating property ensures that the integral is sensitive to orientation and vanishes on degenerate (lower-dimensional) inputs. This is why differential forms, rather than symmetric tensors, appear in Stokes' theorem and its generalizations.
+
+## 12.8 The Exterior Derivative
+
+The exterior derivative is the fundamental differential operator on forms. It generalizes the gradient, curl, and divergence of vector calculus, and it is the key to defining de Rham cohomology.
+
+**Theorem–Definition.** There exists a unique family of $\mathbb{R}$-linear maps $d: \Omega^k(M) \to \Omega^{k+1}(M)$, for each $k \geq 0$, satisfying:
+
+1. **On 0-forms**: $df$ is the differential of $f$ defined in Section 12.6.
+2. **Graded Leibniz rule**: $d(\alpha \wedge \beta) = d\alpha \wedge \beta + (-1)^k \alpha \wedge d\beta$ for $\alpha \in \Omega^k(M)$.
+3. **The fundamental identity**: $d \circ d = 0$.
+
+**In local coordinates.** If $\omega = \sum_{I} \omega_I \, dx^I$ (summing over increasing multi-indices $I = (i_1 < \cdots < i_k)$), then:
+
+$$d\omega = \sum_I \sum_{j=1}^n \frac{\partial \omega_I}{\partial x^j} dx^j \wedge dx^I.$$
+
+**Classical correspondences in $\mathbb{R}^3$.** The exterior derivative unifies the three basic operators of vector calculus:
+
+| Degree | Form | Exterior derivative | Classical name |
+|--------|------|-------------------|----------------|
+| 0 | $f$ | $df = \sum_i \frac{\partial f}{\partial x^i} dx^i$ | Gradient |
+| 1 | $\omega = P\,dx + Q\,dy + R\,dz$ | $d\omega$ | Curl |
+| 2 | $\eta = F\,dy \wedge dz + G\,dz \wedge dx + H\,dx \wedge dy$ | $d\eta$ | Divergence |
+
+The identity $d \circ d = 0$ encodes the classical facts that "the curl of a gradient is zero" and "the divergence of a curl is zero." These are not separate theorems — they are instances of a single algebraic identity.
+
+> **Insight**: The identity $d^2 = 0$ is the differential-geometric counterpart of the chain complex condition $\delta^{k+1} \circ \delta^k = 0$ from Chapter 6. It means that the sequence
+>
+> $$0 \to \Omega^0(M) \xrightarrow{d} \Omega^1(M) \xrightarrow{d} \Omega^2(M) \xrightarrow{d} \cdots \xrightarrow{d} \Omega^n(M) \to 0$$
+>
+> is a cochain complex. This is the **de Rham complex**, and its cohomology is one of the most important invariants in all of geometry.
+
+## 12.9 Pullback of Forms
+
+One of the most powerful properties of differential forms is their behavior under smooth maps. Unlike vector fields, which can only be pushed *forward* along diffeomorphisms, differential forms can be pulled *back* along arbitrary smooth maps.
+
+**Definition.** Let $f: M \to N$ be a smooth map. The **pullback** $f^*: \Omega^k(N) \to \Omega^k(M)$ is defined as follows. For a $k$-form $\omega$ on $N$, the pullback $f^*\omega$ is the $k$-form on $M$ given by:
+
+$$(f^*\omega)_p(v_1, \ldots, v_k) = \omega_{f(p)}(df_p(v_1), \ldots, df_p(v_k))$$
+
+for all $p \in M$ and $v_1, \ldots, v_k \in T_pM$.
+
+**Properties of pullback:**
+
+1. $f^*$ is $\mathbb{R}$-linear: $f^*(\alpha + c\beta) = f^*\alpha + c \, f^*\beta$.
+2. $f^*$ preserves the wedge product: $f^*(\alpha \wedge \beta) = f^*\alpha \wedge f^*\beta$.
+3. $f^*$ commutes with the exterior derivative: $f^* \circ d = d \circ f^*$.
+4. Pullback is functorial: $(g \circ f)^* = f^* \circ g^*$ (note the reversal of order).
+5. On 0-forms: $f^*g = g \circ f$ (pullback of a function is composition).
+
+Property (3) is particularly important: it says that pullback is a **cochain map** from the de Rham complex of $N$ to the de Rham complex of $M$. Consequently, pullback induces maps on de Rham cohomology.
+
+**In coordinates.** If $f: M \to N$ is given in local coordinates by $y^j = f^j(x^1, \ldots, x^m)$, then:
+
+$$f^*(dy^j) = \sum_{i=1}^m \frac{\partial f^j}{\partial x^i} dx^i$$
+
+and the pullback of a general $k$-form is computed by substituting these expressions and applying the rules of the wedge product.
+
+> **Insight**: The functoriality of pullback — the fact that $(g \circ f)^* = f^* \circ g^*$ — is a **contravariant** functoriality. This is the same direction as the restriction maps in a presheaf (Chapter 4). When we view differential forms as a sheaf, the pullback along inclusions of open sets gives the restriction maps. This is not a coincidence; it is the deep structural reason why differential forms naturally form a sheaf.
+
+## 12.10 Integration on Manifolds
+
+Differential forms are designed to be integrated. We give a brief account of the theory, sufficient to state Stokes' theorem.
+
+**Integration of $n$-forms on oriented manifolds.** Let $M$ be an oriented $n$-dimensional manifold (possibly with boundary), and let $\omega \in \Omega^n(M)$ be a compactly supported $n$-form. In a single oriented coordinate chart $(U, \varphi)$ with $\varphi = (x^1, \ldots, x^n)$, the form can be written $\omega = f(x) \, dx^1 \wedge \cdots \wedge dx^n$, and we define:
+
+$$\int_U \omega = \int_{\varphi(U)} f(x^1, \ldots, x^n) \, dx^1 \cdots dx^n$$
+
+where the right-hand side is the ordinary Lebesgue integral on $\mathbb{R}^n$. The key fact — which relies on the transformation law $dx^1 \wedge \cdots \wedge dx^n \mapsto \det(J) \, dy^1 \wedge \cdots \wedge dy^n$ under a change of coordinates with Jacobian $J$ — is that this definition is independent of the choice of oriented chart. Using a partition of unity, we extend the definition to all of $M$.
+
+**Stokes' theorem.** Let $M$ be a compact oriented $n$-dimensional manifold with boundary $\partial M$ (given the induced orientation), and let $\omega \in \Omega^{n-1}(M)$. Then:
+
+$$\int_M d\omega = \int_{\partial M} \omega.$$
+
+This single formula contains the fundamental theorem of calculus (when $M = [a, b]$), Green's theorem (when $M$ is a region in $\mathbb{R}^2$), the classical Stokes' theorem (when $M$ is a surface in $\mathbb{R}^3$), and the divergence theorem (when $M$ is a region in $\mathbb{R}^3$). It is the bridge between the local operation of differentiation ($d$) and the global operation of integration.
+
+## 12.11 De Rham Cohomology: First Glimpse
+
+The de Rham complex and its cohomology connect the differential calculus of this chapter to the homological algebra of Chapter 6.
+
+**Definition.** The **de Rham cohomology groups** of a smooth manifold $M$ are the cohomology groups of the de Rham complex:
+
+$$H^k_{\mathrm{dR}}(M) = \frac{\ker(d: \Omega^k(M) \to \Omega^{k+1}(M))}{\operatorname{im}(d: \Omega^{k-1}(M) \to \Omega^k(M))} = \frac{\{\text{closed } k\text{-forms}\}}{\{\text{exact } k\text{-forms}\}}.$$
+
+A $k$-form $\omega$ is **closed** if $d\omega = 0$, and **exact** if $\omega = d\eta$ for some $(k-1)$-form $\eta$. Since $d^2 = 0$, every exact form is closed, but the converse may fail. The de Rham cohomology measures precisely the extent of this failure.
+
+**Examples:**
+
+1. **$H^0_{\mathrm{dR}}(M)$**: A 0-form $f$ is closed if $df = 0$, i.e., $f$ is locally constant. If $M$ is connected, $H^0_{\mathrm{dR}}(M) \cong \mathbb{R}$ — the only globally constant functions are the constants.
+
+2. **$H^1_{\mathrm{dR}}(\mathbb{R}^n)$**: Every closed 1-form on $\mathbb{R}^n$ is exact (this is the content of the Poincare lemma). Therefore $H^1_{\mathrm{dR}}(\mathbb{R}^n) = 0$.
+
+3. **$H^1_{\mathrm{dR}}(S^1)$**: The 1-form $d\theta$ on the circle is closed but not exact (its integral around $S^1$ is $2\pi \neq 0$). Therefore $H^1_{\mathrm{dR}}(S^1) \cong \mathbb{R}$.
+
+4. **$H^k_{\mathrm{dR}}(S^n)$**: For the $n$-sphere, $H^k_{\mathrm{dR}}(S^n) \cong \mathbb{R}$ for $k = 0$ and $k = n$, and $H^k_{\mathrm{dR}}(S^n) = 0$ for all other $k$.
+
+**The Poincare lemma.** On any contractible open set $U \subseteq M$, every closed $k$-form with $k \geq 1$ is exact. This means $H^k_{\mathrm{dR}}(U) = 0$ for $k \geq 1$ when $U$ is contractible. The Poincare lemma has a profound sheaf-theoretic interpretation: it says that the de Rham complex is a **resolution** of the constant sheaf $\underline{\mathbb{R}}$ by **fine sheaves** (the sheaves of differential forms). This is the technical engine behind de Rham's theorem, which identifies de Rham cohomology with sheaf cohomology.
+
+**De Rham's theorem.** For any smooth manifold $M$:
+
+$$H^k_{\mathrm{dR}}(M) \cong H^k(M; \mathbb{R})$$
+
+where the right-hand side is the singular cohomology of $M$ with real coefficients. This is a deep result: it says that the analytically defined de Rham cohomology (which depends on the smooth structure) is isomorphic to the topologically defined singular cohomology (which depends only on the topology of $M$). The proof, due to de Rham, uses sheaf-theoretic techniques — specifically, the comparison of two resolutions of the constant sheaf.
+
+> **Insight**: De Rham's theorem is the paradigmatic example of how sheaf theory unifies apparently different mathematical theories. The de Rham resolution $0 \to \underline{\mathbb{R}} \to \Omega^0 \to \Omega^1 \to \cdots$ is a fine resolution of the constant sheaf, and the abstract machinery of sheaf cohomology (Chapter 6 and later chapters) shows that the cohomology of *any* acyclic resolution of a sheaf $\mathcal{F}$ computes the sheaf cohomology $H^k(M; \mathcal{F})$. When $\mathcal{F} = \underline{\mathbb{R}}$, the de Rham resolution gives de Rham cohomology, and the Cech resolution gives Cech cohomology, and the singular resolution gives singular cohomology — and all three agree. This is the miracle of sheaf theory.
+
+## Interactive Visualizations
+
+The following interactive components illustrate the key geometric ideas of this chapter.
+
+### Tangent Vectors and the Tangent Plane
+
+The tangent space at a point on a surface is the best linear approximation to the surface at that point. In the simulation below, you can move the base point $p$ across a surface and observe how the tangent plane $T_pM$ rotates and tilts to match the local geometry.
+
+<ManifoldSim
+  manifold="torus"
+  showTangentPlane={true}
+  showTangentVectors={true}
+  interactive={true}
+  height="400px"
+  title="Tangent Space on a Torus"
+  description="Drag the point p across the torus to see how the tangent plane T_pM changes. The two arrows represent a basis for the tangent space at each point."
+/>
+
+Observe how on the outer rim of the torus, the tangent plane is nearly vertical, while on the top and bottom, it is nearly horizontal. The tangent plane always has the same dimension (2, since the torus is a 2-manifold), but its *embedding* in ambient space varies from point to point.
+
+### A Vector Field on the Sphere
+
+A vector field on a manifold assigns a tangent vector to each point. The following visualization shows a smooth vector field on the 2-sphere. By the **hairy ball theorem** (a consequence of the fact that $H^0_{\mathrm{dR}}(S^2) \neq 0$ in an appropriate Euler characteristic sense), every continuous vector field on $S^2$ must vanish somewhere.
+
+<ManifoldSim
+  manifold="sphere"
+  showVectorField={true}
+  vectorFieldType="rotation"
+  interactive={true}
+  height="400px"
+  title="Vector Field on S² (Rotation Field)"
+  description="A rotation vector field on the sphere. Notice the two zeros at the north and south poles — the hairy ball theorem guarantees at least one zero must exist."
+/>
+
+### The Exterior Derivative: From Gradient to Curl
+
+The exterior derivative unifies the classical differential operators. The following visualization shows a scalar function $f$ on $\mathbb{R}^2$, its gradient $df$ (a 1-form), and the vanishing of $d(df) = 0$ (the curl of a gradient is zero).
+
+<FunctionPlotSim
+  functions={[
+    {expr: "sin(x)*cos(y)", label: "f(x,y) = sin(x)cos(y)", type: "surface"},
+    {expr: "[cos(x)*cos(y), -sin(x)*sin(y)]", label: "df = gradient field", type: "vectorField"}
+  ]}
+  domain={[-3.14, 3.14]}
+  range={[-3.14, 3.14]}
+  height="400px"
+  showGradient={true}
+  title="A Function and Its Exterior Derivative (Gradient)"
+  description="The surface shows f(x,y) = sin(x)cos(y). The arrows show the 1-form df, visualized as a gradient vector field. Since d(df) = 0, this vector field is curl-free."
+/>
+
+### Closed but Not Exact: Cohomology on the Punctured Plane
+
+The distinction between closed and exact forms is the heart of de Rham cohomology. On $\mathbb{R}^2 \setminus \{0\}$, the 1-form
+
+$$\omega = \frac{-y \, dx + x \, dy}{x^2 + y^2}$$
+
+is closed ($d\omega = 0$) but not exact — its integral around any loop encircling the origin is $2\pi$. This form represents a non-trivial class in $H^1_{\mathrm{dR}}(\mathbb{R}^2 \setminus \{0\}) \cong \mathbb{R}$.
+
+<FunctionPlotSim
+  functions={[
+    {expr: "[-y/(x*x+y*y), x/(x*x+y*y)]", label: "ω = (-y dx + x dy)/(x²+y²)", type: "vectorField"}
+  ]}
+  domain={[-3, 3]}
+  range={[-3, 3]}
+  singularities={[{x: 0, y: 0}]}
+  height="400px"
+  showIntegralCurves={true}
+  title="A Closed but Non-Exact 1-Form on R² \\ {0}"
+  description="The angular form ω circulates around the origin. It is closed (dω = 0) but not exact: its integral around any loop encircling the origin equals 2π. This detects the 'hole' in the punctured plane."
+/>
+
+This is a beautiful example of how differential forms encode topology. The form $\omega$ "sees" the missing origin through its non-trivial period. In the language of sheaf cohomology, the non-triviality of $\omega$ reflects the fact that the constant sheaf $\underline{\mathbb{R}}$ on $\mathbb{R}^2 \setminus \{0\}$ has non-trivial first cohomology.
+
+## Why This Matters for Reaching Sheaf Theory
+
+The constructions of this chapter are not merely prerequisites for later material — they are the *prototypical examples* of the structures that sheaf theory formalizes. Let us make the connections explicit.
+
+**Differential forms form a sheaf.** For each $k \geq 0$, the assignment
+
+$$U \mapsto \Omega^k(U)$$
+
+that sends each open set $U \subseteq M$ to the space of smooth $k$-forms on $U$ is a **sheaf of real vector spaces** on $M$. The restriction maps are the pullbacks along inclusion maps $\iota: V \hookrightarrow U$:
+
+$$\rho_{U,V}: \Omega^k(U) \to \Omega^k(V), \quad \omega \mapsto \iota^*\omega = \omega|_V.$$
+
+The gluing axiom holds because differential forms are determined locally: if a collection of forms on overlapping open sets agree on the overlaps, they glue to a unique global form. This is the **locality** and **gluing** properties from Chapter 4.
+
+**The exterior derivative is a morphism of sheaves.** The map $d: \Omega^k \to \Omega^{k+1}$ is a morphism of sheaves — it commutes with restrictions. The de Rham complex
+
+$$0 \to \underline{\mathbb{R}} \xrightarrow{\iota} \Omega^0 \xrightarrow{d} \Omega^1 \xrightarrow{d} \Omega^2 \xrightarrow{d} \cdots$$
+
+is an exact sequence of sheaves (by the Poincare lemma, the sequence is exact on stalks). Moreover, the sheaves $\Omega^k$ are **fine** (they admit partitions of unity), and fine sheaves are acyclic for the global sections functor. This means the de Rham complex is a **fine resolution** of the constant sheaf $\underline{\mathbb{R}}$.
+
+**De Rham cohomology is sheaf cohomology.** By the general theory of derived functors (which we will develop fully in later chapters), the cohomology of any acyclic resolution of a sheaf $\mathcal{F}$ computes the sheaf cohomology $H^k(M; \mathcal{F})$. Applying this to the de Rham resolution:
+
+$$H^k_{\mathrm{dR}}(M) = H^k(\Omega^*(M), d) \cong H^k(M; \underline{\mathbb{R}}).$$
+
+This is de Rham's theorem, now understood as a corollary of general sheaf-theoretic principles.
+
+**The tangent and cotangent bundles are sheaves of modules.** The assignment $U \mapsto \mathfrak{X}(U)$ (smooth vector fields on $U$) is a sheaf of $C^\infty$-modules, and similarly for $U \mapsto \Omega^k(U)$. The Lie bracket gives the sheaf $\mathfrak{X}$ the structure of a **sheaf of Lie algebras**. These enriched sheaf structures play a central role in the theory of connections, curvature, and characteristic classes — topics that appear in the later chapters of this book.
+
+> **Philosophical Insight**: The passage from this chapter to sheaf theory is not a leap into abstraction — it is a recognition that the structures we have already built (forms, their locality, their gluing, their cohomology) are exactly the structures that the word "sheaf" was invented to name. Every theorem about differential forms that involves patching local data into global data is, whether or not the word is used, a theorem about sheaves.
+
+## What to Carry Forward
+
+As you proceed to the remaining chapters of this book, keep the following ideas close at hand.
+
+**1. Tangent spaces linearize geometry.** At every point of a manifold, the tangent space provides a finite-dimensional vector space in which local computations reduce to the linear algebra of Chapters 1--3. The differential of a map is a linear map between tangent spaces, and its rank, kernel, and image carry geometric meaning (immersions, submersions, critical points).
+
+**2. Vector fields are sections of a bundle.** A vector field is a global object — a smooth choice of tangent vector at every point — and the space of vector fields is an infinite-dimensional Lie algebra. The sheaf of vector fields $\mathfrak{X}$ is the first example of a sheaf of non-abelian algebraic structures that we encounter, and it is the prototype for gauge fields in mathematical physics.
+
+**3. Differential forms are the correct language for integration.** The exterior algebra $\Omega^*(M)$, equipped with the exterior derivative $d$, provides a unified framework for all of classical vector calculus. The wedge product gives algebraic structure; the pullback gives functoriality; the exterior derivative gives a differential.
+
+**4. The de Rham complex is a cochain complex.** The identity $d^2 = 0$ turns the spaces of differential forms into a cochain complex, and the resulting cohomology — de Rham cohomology — is a topological invariant. This is a concrete instance of the chain complexes from Chapter 6.
+
+**5. De Rham cohomology is sheaf cohomology.** The Poincare lemma says that the de Rham complex resolves the constant sheaf $\underline{\mathbb{R}}$. The acyclicity of the sheaves $\Omega^k$ (due to partitions of unity) means that this resolution computes sheaf cohomology. De Rham's theorem is the statement that this computation agrees with singular cohomology.
+
+**6. Pullback gives contravariant functoriality.** The pullback of forms along smooth maps is the geometric instance of the restriction maps in a sheaf. The contravariant nature of pullback — $(g \circ f)^* = f^* \circ g^*$ — mirrors the contravariant nature of presheaf restriction.
+
+These six principles form the bridge between the differential geometry of this chapter and the sheaf-theoretic unification that is the goal of this book. In the chapters to come, we will see that the pattern established here — local objects, gluing conditions, resolutions, derived functors, cohomology — applies not only to differential forms but to algebraic, topological, and combinatorial structures of every kind. The tangent space was our first local linearization; sheaf theory will be the final, universal one.

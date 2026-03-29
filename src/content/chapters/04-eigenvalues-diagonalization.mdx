@@ -1,0 +1,451 @@
+# Chapter 4: Linear Maps, Eigenvalues, Diagonalization, and Geometric Dynamics
+
+## Guiding Idea of the Chapter
+
+In the first three chapters, we built a universe from axioms. We conjured vector spaces from the void, gave them geometric agency through matrices and transformations, and endowed them with metric structure through inner products. We watched transformations stretch, rotate, and shear the plane; we measured lengths, angles, and projections; we decomposed matrices into their singular anatomy via the SVD.
+
+But we have been studying transformations from the *outside*—observing what they do to generic vectors, cataloguing their effects on the unit circle, computing their determinants and singular values. We have not yet asked the most penetrating question one can ask about a linear map:
+
+**Are there directions in space that the transformation leaves invariant?**
+
+This is the eigenvalue problem. It asks not "What does the transformation do to everything?" but rather "What does the transformation do to *nothing*—or rather, to those special vectors that it merely rescales without rotating?" These privileged directions, if they exist, are the **eigenvectors**, and the scaling factors along them are the **eigenvalues**. Together, they form the intrinsic skeleton of the transformation—the directions along which the map acts most simply.
+
+The discovery of eigenvectors is, in a precise sense, the discovery that many linear maps are secretly diagonal. The matrix that looks complicated in your chosen coordinates may look trivially simple in the coordinate system dictated by its own eigenvectors. The act of changing to that coordinate system is **diagonalization**, and it transforms the study of linear dynamics from an opaque algebraic exercise into transparent geometric reasoning.
+
+> **Philosophical Insight**: The eigenvalue problem is the search for the natural coordinate system of a transformation. Just as a sculptor reveals the figure already latent in the marble, diagonalization reveals the geometry already latent in the matrix. The eigenvectors are not imposed from outside—they are the transformation's own declaration of its preferred directions.
+
+This chapter will carry us from the abstract definition of linear maps between vector spaces, through the eigenvalue problem and the characteristic polynomial, to the diagonalization theorem and its profound consequences for dynamics. We will see iterated maps converge or diverge along eigendirections, study stability through the spectral radius, encounter the spectral theorem as a jewel of symmetric geometry, and glimpse the Jordan normal form as a consolation when diagonalization fails. By the end, we will understand why eigenvalues govern everything from the long-term behavior of Markov chains to the convergence of Google's PageRank algorithm.
+
+## 4.1 Linear Maps Between Vector Spaces
+
+### From Matrices to Maps
+
+In Chapter 2, we studied matrices as geometric transformations of $\mathbb{R}^n$. But the concept of a linear transformation is far more general than any matrix. A **linear map** (or linear transformation) is a function $T: V \to W$ between two vector spaces that respects the two fundamental operations:
+
+$$
+T(\mathbf{u} + \mathbf{v}) = T(\mathbf{u}) + T(\mathbf{v}) \quad \text{and} \quad T(c\mathbf{v}) = cT(\mathbf{v})
+$$
+
+for all vectors $\mathbf{u}, \mathbf{v} \in V$ and all scalars $c \in \mathbb{F}$. These two conditions can be collapsed into a single requirement: $T$ preserves linear combinations.
+
+$$
+T(c_1 \mathbf{v}_1 + c_2 \mathbf{v}_2 + \dots + c_k \mathbf{v}_k) = c_1 T(\mathbf{v}_1) + c_2 T(\mathbf{v}_2) + \dots + c_k T(\mathbf{v}_k)
+$$
+
+This is the essence of linearity. A linear map is a *structure-preserving* function—it carries the algebraic skeleton of $V$ faithfully into $W$. The image of a subspace is a subspace. The image of a linear combination is the same linear combination of images. Nothing is distorted in the passage from domain to codomain except what linearity itself allows: rescaling and recombination.
+
+### The Kernel and Image
+
+Every linear map $T: V \to W$ defines two fundamental subspaces that encode what the map destroys and what it creates.
+
+The **kernel** (or null space) of $T$ is the set of all vectors that the map sends to zero:
+
+$$
+\ker(T) = \{ \mathbf{v} \in V \mid T(\mathbf{v}) = \mathbf{0}_W \}
+$$
+
+This is always a subspace of $V$. It measures the "waste" of the transformation—the entire subspace of information that $T$ annihilates. If $\ker(T) = \{\mathbf{0}\}$, then $T$ destroys nothing, and distinct inputs always produce distinct outputs ($T$ is **injective**). If $\ker(T)$ is larger, then entire families of inputs collapse to the same output.
+
+The **image** (or range) of $T$ is the set of all vectors in $W$ that are actually reached by $T$:
+
+$$
+\text{Im}(T) = \{ T(\mathbf{v}) \mid \mathbf{v} \in V \} = \{ \mathbf{w} \in W \mid \exists \, \mathbf{v} \in V \text{ with } T(\mathbf{v}) = \mathbf{w} \}
+$$
+
+This is always a subspace of $W$. It measures the "reach" of the transformation—how much of the codomain is actually populated by outputs. If $\text{Im}(T) = W$, then $T$ is **surjective**: every vector in $W$ is hit.
+
+> **Philosophical Insight**: The kernel and image are dual shadows of the same linear map. The kernel tells you what the map forgets; the image tells you what the map remembers. Together, they partition the algebraic content of the map into destruction and creation. In the language of sheaves, these will become the stalks of the kernel sheaf and the image sheaf—local measurements of what a global map destroys and preserves at each point.
+
+### The Rank-Nullity Theorem
+
+The most fundamental accounting identity in linear algebra relates these two subspaces:
+
+$$
+\dim(\ker(T)) + \dim(\text{Im}(T)) = \dim(V)
+$$
+
+Equivalently, using the classical terminology where $\dim(\ker(T))$ is the **nullity** and $\dim(\text{Im}(T))$ is the **rank**:
+
+$$
+\text{nullity}(T) + \text{rank}(T) = \dim(V)
+$$
+
+This theorem states that the dimensions of what is destroyed and what is preserved must sum to the dimension of the domain. There is no dimensional leakage. Every dimension of $V$ either survives the passage through $T$ (contributing to the image) or is annihilated (contributing to the kernel), and the two fates are mutually exclusive and exhaustive.
+
+For a matrix $A \in \mathbb{R}^{m \times n}$ representing a linear map $T: \mathbb{R}^n \to \mathbb{R}^m$, the rank is the number of linearly independent columns (or equivalently, the number of nonzero singular values from Chapter 3), and the nullity is the dimension of the solution space of $A\mathbf{x} = \mathbf{0}$.
+
+## 4.2 The Eigenvalue Problem: $A\mathbf{x} = \lambda\mathbf{x}$
+
+### Invariant Directions
+
+We now arrive at the central question of this chapter. Given a linear map $T: V \to V$ (note: the domain and codomain must be the *same* space), we ask:
+
+**For which nonzero vectors $\mathbf{v} \in V$ does $T$ act as mere scalar multiplication?**
+
+That is, for which $\mathbf{v} \neq \mathbf{0}$ does there exist a scalar $\lambda$ such that
+
+$$
+T(\mathbf{v}) = \lambda \mathbf{v}
+$$
+
+Such a vector $\mathbf{v}$ is called an **eigenvector** of $T$, and the scalar $\lambda$ is the corresponding **eigenvalue**. The word "eigen" is German for "own" or "intrinsic"—these are the transformation's *own* vectors, the directions it claims as natively its own.
+
+Geometrically, an eigenvector is a direction that $T$ does not rotate. It may stretch it (if $|\lambda| > 1$), compress it (if $|\lambda| < 1$), reverse it (if $\lambda < 0$), or leave it perfectly unchanged (if $\lambda = 1$). But the direction itself—the line spanned by $\mathbf{v}$—is invariant under $T$.
+
+Consider a concrete example. Let
+
+$$
+A = \begin{bmatrix} 2 & 1 \\ 0 & 3 \end{bmatrix}
+$$
+
+The vector $\mathbf{v}_1 = [1, 0]^T$ satisfies $A\mathbf{v}_1 = [2, 0]^T = 2\mathbf{v}_1$, so $\mathbf{v}_1$ is an eigenvector with eigenvalue $\lambda_1 = 2$. The vector $\mathbf{v}_2 = [1, 1]^T$ satisfies $A\mathbf{v}_2 = [3, 3]^T = 3\mathbf{v}_2$, so $\mathbf{v}_2$ is an eigenvector with eigenvalue $\lambda_2 = 3$.
+
+Along these two directions, the matrix $A$ does nothing more than scale. The complicated-looking upper triangular matrix is, in secret, just "stretch by 2 along $[1,0]^T$ and stretch by 3 along $[1,1]^T$." The eigenvectors have decoded the matrix.
+
+> **Philosophical Insight**: Finding eigenvectors is an act of *listening* to the transformation. Instead of imposing an arbitrary coordinate system and asking "What does $T$ look like in my coordinates?", we ask "What coordinate system does $T$ itself prefer?" The eigenvectors are the answer: they are the axes of the transformation's own private geometry.
+
+### The Eigenspace
+
+For a given eigenvalue $\lambda$, the set of all eigenvectors corresponding to $\lambda$, together with the zero vector, forms a subspace called the **eigenspace**:
+
+$$
+E_\lambda = \ker(T - \lambda I) = \{ \mathbf{v} \in V \mid T(\mathbf{v}) = \lambda \mathbf{v} \}
+$$
+
+This is the kernel of the shifted map $T - \lambda I$. The eigenspace $E_\lambda$ is the collection of all vectors that $T$ treats as belonging to the scaling factor $\lambda$. Its dimension is called the **geometric multiplicity** of $\lambda$—a quantity we will soon distinguish carefully from the algebraic multiplicity.
+
+## 4.3 The Characteristic Polynomial
+
+### Finding Eigenvalues Algebraically
+
+The equation $A\mathbf{x} = \lambda\mathbf{x}$ can be rewritten as $(A - \lambda I)\mathbf{x} = \mathbf{0}$. For a nonzero solution $\mathbf{x}$ to exist, the matrix $A - \lambda I$ must be singular—it must have a nontrivial kernel. By the determinant criterion from Chapter 2, this happens precisely when:
+
+$$
+\det(A - \lambda I) = 0
+$$
+
+This equation is the gateway to all eigenvalue computations. The expression $\det(A - \lambda I)$, viewed as a function of the unknown $\lambda$, is a polynomial in $\lambda$ called the **characteristic polynomial** of $A$:
+
+$$
+p_A(\lambda) = \det(A - \lambda I)
+$$
+
+For an $n \times n$ matrix, this is a polynomial of degree $n$. Its roots are precisely the eigenvalues of $A$.
+
+### The $2 \times 2$ Case
+
+For a $2 \times 2$ matrix $A = \begin{bmatrix} a & b \\ c & d \end{bmatrix}$, the characteristic polynomial is:
+
+$$
+p_A(\lambda) = \det \begin{bmatrix} a - \lambda & b \\ c & d - \lambda \end{bmatrix} = (a - \lambda)(d - \lambda) - bc = \lambda^2 - (a + d)\lambda + (ad - bc)
+$$
+
+This is a quadratic in $\lambda$. Notice two remarkable facts:
+
+1. The coefficient of $\lambda$ is $-(a + d) = -\text{tr}(A)$, the negative of the **trace** (sum of diagonal entries).
+2. The constant term is $ad - bc = \det(A)$, the determinant.
+
+So the characteristic polynomial of a $2 \times 2$ matrix encodes both the trace and the determinant:
+
+$$
+p_A(\lambda) = \lambda^2 - \text{tr}(A) \cdot \lambda + \det(A)
+$$
+
+The eigenvalues are the roots of this quadratic, given by:
+
+$$
+\lambda = \frac{\text{tr}(A) \pm \sqrt{\text{tr}(A)^2 - 4\det(A)}}{2}
+$$
+
+The discriminant $\Delta = \text{tr}(A)^2 - 4\det(A)$ determines the nature of the eigenvalues:
+- If $\Delta > 0$: two distinct real eigenvalues.
+- If $\Delta = 0$: one repeated real eigenvalue (with multiplicity 2).
+- If $\Delta < 0$: two complex conjugate eigenvalues (no real eigenvectors exist).
+
+### The General Case and Cayley-Hamilton
+
+For an $n \times n$ matrix, the characteristic polynomial has degree $n$:
+
+$$
+p_A(\lambda) = (-1)^n \lambda^n + (-1)^{n-1} \text{tr}(A) \lambda^{n-1} + \dots + \det(A)
+$$
+
+By the Fundamental Theorem of Algebra, this polynomial has exactly $n$ roots (counted with multiplicity) in $\mathbb{C}$. Therefore, every $n \times n$ matrix has exactly $n$ eigenvalues over $\mathbb{C}$, though some may be complex and some may repeat.
+
+A profound consequence is the **Cayley-Hamilton Theorem**: every matrix satisfies its own characteristic polynomial. That is, if $p_A(\lambda) = \lambda^n + c_{n-1}\lambda^{n-1} + \dots + c_0$, then
+
+$$
+p_A(A) = A^n + c_{n-1}A^{n-1} + \dots + c_0 I = \mathbf{0}
+$$
+
+The matrix, when plugged into its own defining equation, yields the zero matrix. This is not merely a curiosity—it means that every power of $A$ beyond $A^{n-1}$ can be expressed as a linear combination of $I, A, A^2, \dots, A^{n-1}$. The matrix algebra generated by $A$ is finite-dimensional, and the characteristic polynomial is its annihilating relation.
+
+## 4.4 Algebraic vs. Geometric Multiplicity
+
+### Two Measures of Eigenvalue "Size"
+
+Each eigenvalue $\lambda$ carries two distinct multiplicity counts, and their relationship governs whether diagonalization is possible.
+
+The **algebraic multiplicity** $a_\lambda$ is the multiplicity of $\lambda$ as a root of the characteristic polynomial. If $p_A(\lambda)$ factors as $(\lambda - \lambda_1)^{a_1}(\lambda - \lambda_2)^{a_2} \cdots (\lambda - \lambda_k)^{a_k}$, then $a_i$ is the algebraic multiplicity of $\lambda_i$. The sum $a_1 + a_2 + \dots + a_k = n$.
+
+The **geometric multiplicity** $g_\lambda$ is the dimension of the eigenspace $E_\lambda = \ker(A - \lambda I)$. It counts how many linearly independent eigenvectors correspond to $\lambda$.
+
+A fundamental inequality governs the relationship between these two quantities:
+
+$$
+1 \leq g_\lambda \leq a_\lambda
+$$
+
+The geometric multiplicity is always at least 1 (every eigenvalue has at least one eigenvector) and at most equal to the algebraic multiplicity (you can never have more independent eigenvectors than the polynomial root multiplicity allows).
+
+When $g_\lambda = a_\lambda$ for every eigenvalue, the matrix has a full complement of linearly independent eigenvectors. When $g_\lambda < a_\lambda$ for some eigenvalue, the matrix is **defective**—it lacks enough eigenvectors to form a basis, and diagonalization fails.
+
+### An Instructive Example
+
+Consider the matrix
+
+$$
+A = \begin{bmatrix} 2 & 1 \\ 0 & 2 \end{bmatrix}
+$$
+
+The characteristic polynomial is $p_A(\lambda) = (2 - \lambda)^2$, so $\lambda = 2$ is the only eigenvalue with algebraic multiplicity $a_2 = 2$. But the eigenspace is $E_2 = \ker(A - 2I) = \ker \begin{bmatrix} 0 & 1 \\ 0 & 0 \end{bmatrix}$, which is spanned by $[1, 0]^T$ alone. The geometric multiplicity is $g_2 = 1 < 2 = a_2$.
+
+This matrix is defective. It has only one independent eigenvector, not two. It cannot be diagonalized. Geometrically, it is a **shear**: it slides space along the $x$-axis in proportion to the $y$-coordinate, and no change of basis can reduce it to a pure scaling. This is the phenomenon that the Jordan normal form is designed to handle.
+
+## 4.5 The Diagonalization Theorem
+
+### When a Matrix Reveals Its Skeleton
+
+A matrix $A \in \mathbb{R}^{n \times n}$ is **diagonalizable** if there exists an invertible matrix $P$ such that
+
+$$
+P^{-1}AP = D
+$$
+
+where $D$ is a diagonal matrix. Equivalently, $A = PDP^{-1}$.
+
+The columns of $P$ are the eigenvectors of $A$, and the diagonal entries of $D$ are the corresponding eigenvalues. This factorization says: if you change to the coordinate system defined by the eigenvectors (via $P$), then in that coordinate system the transformation is purely diagonal—it scales each eigendirection independently, with no coupling between them.
+
+**Theorem (Diagonalization Criterion).** An $n \times n$ matrix $A$ is diagonalizable if and only if $A$ has $n$ linearly independent eigenvectors. Equivalently, $A$ is diagonalizable if and only if the geometric multiplicity equals the algebraic multiplicity for every eigenvalue.
+
+Two important sufficient conditions:
+
+1. **Distinct eigenvalues suffice**: If $A$ has $n$ distinct eigenvalues, then it has $n$ linearly independent eigenvectors (eigenvectors from different eigenvalues are always independent) and is therefore diagonalizable.
+
+2. **Symmetric matrices always diagonalize**: If $A = A^T$, then $A$ is diagonalizable regardless of repeated eigenvalues. This is the content of the Spectral Theorem, which we treat next.
+
+### The Power of Diagonalization
+
+Why does diagonalization matter? Because diagonal matrices are trivially simple to work with. If $A = PDP^{-1}$, then:
+
+$$
+A^k = PD^kP^{-1}
+$$
+
+and $D^k$ is simply the diagonal matrix with entries $\lambda_1^k, \lambda_2^k, \dots, \lambda_n^k$. Computing the $k$-th power of a matrix reduces to computing the $k$-th power of its eigenvalues. This is the key to understanding dynamical systems, as we shall see.
+
+Similarly, the matrix exponential (central to solving systems of differential equations) becomes:
+
+$$
+e^{At} = P e^{Dt} P^{-1} = P \begin{bmatrix} e^{\lambda_1 t} & & \\ & \ddots & \\ & & e^{\lambda_n t} \end{bmatrix} P^{-1}
+$$
+
+Every operation that involves repeated application of $A$ decomposes cleanly along the eigendirections.
+
+## 4.6 The Spectral Theorem for Symmetric Matrices
+
+### The Jewel of Linear Algebra
+
+Among all the theorems of linear algebra, the Spectral Theorem stands as perhaps the most beautiful and consequential. It applies to **symmetric** (or, in the complex case, **Hermitian**) matrices and guarantees a diagonalization of extraordinary quality.
+
+**Theorem (Real Spectral Theorem).** Let $A \in \mathbb{R}^{n \times n}$ be a symmetric matrix ($A = A^T$). Then:
+
+1. All eigenvalues of $A$ are **real**.
+2. Eigenvectors corresponding to distinct eigenvalues are **orthogonal**.
+3. $A$ is **orthogonally diagonalizable**: there exists an orthogonal matrix $Q$ (meaning $Q^T Q = I$) such that $A = Q \Lambda Q^T$, where $\Lambda$ is diagonal with the eigenvalues of $A$.
+
+The columns of $Q$ form an orthonormal basis of eigenvectors. This is a diagonalization using a *rotation*—the change of basis preserves lengths and angles.
+
+> **Philosophical Insight**: The Spectral Theorem says that symmetric matrices are the "nicest" linear maps: they act by stretching along mutually perpendicular directions. There is no shearing, no rotation—only pure, axis-aligned scaling in an orthogonal eigenbasis. This is why symmetric matrices arise naturally in physics (they represent observables in quantum mechanics, stress tensors in continuum mechanics, and covariance matrices in statistics): nature's most fundamental quantities are symmetric because they represent measurements that are inherently geometric and basis-independent.
+
+### Connection to the SVD
+
+Recall from Chapter 3 that every matrix $A$ (not necessarily square or symmetric) admits a Singular Value Decomposition $A = U \Sigma V^T$. For a symmetric positive semi-definite matrix $A = A^T$ with $A \succeq 0$, the SVD and the spectral decomposition coincide: the singular values are the eigenvalues, and $U = V = Q$. The Spectral Theorem is, in this sense, the SVD restricted to the symmetric case—and it is precisely this restriction that grants the additional gift of orthogonal eigenvectors and real eigenvalues.
+
+For a general symmetric matrix (possibly with negative eigenvalues), the singular values are the *absolute values* of the eigenvalues, and the SVD absorbs the sign information into the left and right singular vectors.
+
+## 4.7 Geometric Dynamics: Iterated Maps and Stability
+
+### The Dynamical Perspective
+
+Suppose we iterate a linear map. Starting from an initial vector $\mathbf{x}_0$, we define
+
+$$
+\mathbf{x}_{k+1} = A\mathbf{x}_k
+$$
+
+so that $\mathbf{x}_k = A^k \mathbf{x}_0$. What happens as $k \to \infty$?
+
+If $A$ is diagonalizable with $A = PDP^{-1}$, we can decompose $\mathbf{x}_0$ in the eigenbasis: $\mathbf{x}_0 = c_1 \mathbf{v}_1 + c_2 \mathbf{v}_2 + \dots + c_n \mathbf{v}_n$. Then
+
+$$
+\mathbf{x}_k = A^k \mathbf{x}_0 = c_1 \lambda_1^k \mathbf{v}_1 + c_2 \lambda_2^k \mathbf{v}_2 + \dots + c_n \lambda_n^k \mathbf{v}_n
+$$
+
+The long-term behavior is now transparent:
+
+- If $|\lambda_i| < 1$: the component along $\mathbf{v}_i$ **decays** exponentially. This eigendirection is **stable**—perturbations along it shrink over time.
+- If $|\lambda_i| > 1$: the component along $\mathbf{v}_i$ **grows** exponentially. This eigendirection is **unstable**—perturbations along it amplify without bound.
+- If $|\lambda_i| = 1$: the component along $\mathbf{v}_i$ is **neutrally stable**—it neither grows nor decays (though it may oscillate if $\lambda_i$ is complex).
+
+The **spectral radius** $\rho(A) = \max_i |\lambda_i|$ determines the overall asymptotic behavior:
+
+- If $\rho(A) < 1$: all trajectories converge to $\mathbf{0}$. The origin is a **global attractor**.
+- If $\rho(A) > 1$: generic trajectories diverge to infinity.
+- If $\rho(A) = 1$: the behavior depends on the finer structure (geometric multiplicities, whether eigenvalues on the unit circle are defective).
+
+### Phase Portraits in 2D
+
+For $2 \times 2$ matrices, the eigenvalue structure determines the **phase portrait**—the qualitative picture of all orbits $\{\mathbf{x}_k\}$ simultaneously. The classification includes:
+
+- **Stable node** ($0 < \lambda_2 < \lambda_1 < 1$): all orbits spiral inward along eigendirections, converging to the origin. The slower eigendirection dominates near the origin.
+- **Unstable node** ($\lambda_2 > \lambda_1 > 1$): all orbits diverge outward along eigendirections.
+- **Saddle point** ($\lambda_1 > 1 > \lambda_2 > 0$): orbits converge along the stable eigendirection and diverge along the unstable one, creating a hyperbolic flow.
+- **Stable spiral** (complex $\lambda$ with $|\lambda| < 1$): orbits spiral inward with rotation. No real eigenvectors exist, but the complex eigenvalues encode both the rotation angle and the contraction rate.
+- **Unstable spiral** (complex $\lambda$ with $|\lambda| > 1$): orbits spiral outward.
+- **Center** (complex $\lambda$ with $|\lambda| = 1$): orbits trace closed ellipses. The system is conservative.
+
+> **Philosophical Insight**: The eigenvalues of a matrix are the DNA of its dynamical behavior. Just as the genetic code determines the long-term fate of an organism, the eigenvalues determine the long-term fate of every trajectory under iteration. The eigenvectors are the body plan—they determine the spatial architecture of the dynamics—while the eigenvalues are the growth rates that determine whether each part of the architecture expands, contracts, or persists.
+
+### Continuous-Time Dynamics
+
+For continuous-time systems governed by the differential equation $\dot{\mathbf{x}} = A\mathbf{x}$, the solution is $\mathbf{x}(t) = e^{At}\mathbf{x}_0$. The role of $\lambda^k$ is now played by $e^{\lambda t}$:
+
+- $\text{Re}(\lambda) < 0$: exponential decay (stable).
+- $\text{Re}(\lambda) > 0$: exponential growth (unstable).
+- $\text{Re}(\lambda) = 0$: oscillation (neutrally stable).
+
+The stability criterion shifts from the unit disk to the left half-plane, but the eigenvector-based decomposition remains identical in structure.
+
+## 4.8 Jordan Normal Form: When Diagonalization Fails
+
+### The Defective Case
+
+When a matrix is defective (geometric multiplicity strictly less than algebraic multiplicity for some eigenvalue), diagonalization is impossible. But all is not lost. Every square matrix over $\mathbb{C}$ is similar to a **Jordan normal form**:
+
+$$
+J = \begin{bmatrix} J_1 & & \\ & J_2 & \\ & & \ddots \end{bmatrix}
+$$
+
+where each **Jordan block** $J_i$ has the form
+
+$$
+J_i = \begin{bmatrix} \lambda_i & 1 & 0 & \cdots & 0 \\ 0 & \lambda_i & 1 & \cdots & 0 \\ \vdots & & \ddots & \ddots & \vdots \\ 0 & 0 & \cdots & \lambda_i & 1 \\ 0 & 0 & \cdots & 0 & \lambda_i \end{bmatrix}
+$$
+
+The ones on the super-diagonal are the "ghosts" of the missing eigenvectors. They represent the irreducible coupling that remains even in the simplest possible coordinate system. A Jordan block of size $m > 1$ means there is only one eigenvector for a $\lambda$ that appears $m$ times—the remaining $m - 1$ basis vectors are **generalized eigenvectors** satisfying $(A - \lambda I)^j \mathbf{v} = \mathbf{0}$ for some $j > 1$.
+
+### Dynamical Consequences
+
+Jordan blocks of size $m > 1$ produce **polynomial-times-exponential** behavior in dynamics:
+
+$$
+J_i^k = \lambda_i^k \begin{bmatrix} 1 & \binom{k}{1}\lambda_i^{-1} & \binom{k}{2}\lambda_i^{-2} & \cdots \\ 0 & 1 & \binom{k}{1}\lambda_i^{-1} & \cdots \\ \vdots & & \ddots & \\ 0 & 0 & \cdots & 1 \end{bmatrix}
+$$
+
+The terms $\binom{k}{j}\lambda_i^{k-j}$ grow polynomially in $k$ before being multiplied by $\lambda_i^k$. For $|\lambda_i| < 1$, the exponential decay eventually dominates and the system still converges—but more slowly than in the diagonalizable case. For $|\lambda_i| = 1$, however, Jordan blocks produce **secular growth**: polynomial divergence even though no eigenvalue exceeds the unit circle in magnitude. This is why the distinction between algebraic and geometric multiplicity has physical consequences.
+
+> **Philosophical Insight**: The Jordan form is a consolation prize—not as elegant as diagonalization, but still profoundly informative. It represents the *finest possible simplification* of a linear map. If diagonalization is the matrix revealing its skeleton as pure eigendirections, the Jordan form reveals a skeleton that still has a few bones fused together. The fused bones (the super-diagonal ones) encode the irreducible complexity that no change of coordinates can eliminate.
+
+## 4.9 Applications: Dynamical Systems, Markov Chains, and PageRank
+
+### Markov Chains and Stochastic Matrices
+
+A **Markov chain** models a system that transitions between $n$ states with fixed probabilities. The transition matrix $P$ has entries $P_{ij}$ representing the probability of moving from state $j$ to state $i$. Each column sums to 1 (the system must go *somewhere*), making $P$ a **column-stochastic matrix**.
+
+The state distribution after $k$ steps is $\boldsymbol{\pi}_k = P^k \boldsymbol{\pi}_0$, which is exactly the iterated map framework of Section 4.7. The eigenvalue structure of $P$ controls convergence:
+
+1. Every stochastic matrix has $\lambda = 1$ as an eigenvalue. The corresponding eigenvector is the **stationary distribution** $\boldsymbol{\pi}^*$ satisfying $P\boldsymbol{\pi}^* = \boldsymbol{\pi}^*$.
+2. All other eigenvalues satisfy $|\lambda| \leq 1$ (a consequence of the Perron-Frobenius theorem for non-negative matrices).
+3. If the chain is **irreducible** (every state is reachable from every other) and **aperiodic** (the system does not cycle deterministically), then $\lambda = 1$ is the unique eigenvalue of largest magnitude, and $P^k \boldsymbol{\pi}_0 \to \boldsymbol{\pi}^*$ for any initial distribution.
+
+The rate of convergence is governed by the **second-largest eigenvalue** $|\lambda_2|$: the closer it is to 1, the slower the chain mixes. The **spectral gap** $1 - |\lambda_2|$ is the fundamental measure of mixing speed.
+
+### Google's PageRank
+
+The PageRank algorithm, which powered Google's original search engine, is precisely a Markov chain eigenvector computation. The "web surfer" model defines a stochastic matrix $P$ where $P_{ij}$ is the probability of following a link from page $j$ to page $i$. The stationary distribution $\boldsymbol{\pi}^*$ of this chain assigns to each web page its "importance score."
+
+To ensure the chain is irreducible and aperiodic (the web graph has dead ends and cycles), Google modifies the transition matrix with a "teleportation" parameter $\alpha \in (0,1)$:
+
+$$
+M = \alpha P + \frac{1 - \alpha}{n} \mathbf{1}\mathbf{1}^T
+$$
+
+where $\mathbf{1}$ is the all-ones vector. With probability $\alpha$, the surfer follows a link; with probability $1 - \alpha$, the surfer "teleports" to a random page. The Perron-Frobenius theorem guarantees a unique stationary distribution, and the power iteration $\boldsymbol{\pi}_{k+1} = M\boldsymbol{\pi}_k$ converges to it at a rate determined by $\alpha$ (which Google historically set to $0.85$).
+
+### Dynamical Systems in Biology
+
+In Gene Regulatory Networks (GRNs), the state of a cell can be modeled as a vector $\mathbf{x} \in \mathbb{R}^n$ representing the expression levels of $n$ genes. Near an equilibrium, the dynamics are approximately linear: $\mathbf{x}_{k+1} \approx A\mathbf{x}_k$, where $A$ is the Jacobian matrix of the regulatory interactions.
+
+The eigenvalues of $A$ determine the stability of the equilibrium—whether the cell returns to its state after a perturbation (stable, all $|\lambda_i| < 1$) or transitions to a new state (unstable, some $|\lambda_i| > 1$). The eigenvectors identify the *modes* of gene expression: correlated groups of genes that rise and fall together. This is precisely how principal component analysis (PCA) of gene expression data works—PCA computes the eigenvectors of the covariance matrix, revealing the dominant patterns of variation.
+
+## 4.10 Interactive Visualizations
+
+The following interactive simulation lets you explore the eigenvalue problem, diagonalization, and geometric dynamics for $2 \times 2$ matrices directly. Adjust the matrix entries and watch how the eigenvectors, eigenvalues, and iterated orbits respond in real time.
+
+### Eigenvector Mode
+
+In **eigenvectors** mode, you will see the eigenvectors of the matrix drawn as arrows, with the eigenvalues displayed alongside. Modify the matrix entries and observe how the eigenvectors rotate and the eigenvalues shift. Pay particular attention to what happens when the eigenvalues become complex (the eigenvectors disappear from the real plane) or when they coalesce (the matrix approaches defectiveness).
+
+<EigenSim mode="eigenvectors" />
+
+### Diagonalization Mode
+
+In **diagonalization** mode, the visualization shows the decomposition $A = PDP^{-1}$ in action. You can see the original coordinate grid, the eigenvector basis $P$, and the diagonal action $D$. This mode makes visible the fundamental insight: in the eigenbasis, the transformation is merely axis-aligned scaling.
+
+<EigenSim mode="diagonalization" />
+
+### Dynamics Mode
+
+In **dynamics** mode, you can observe the iterated application of the matrix to an initial vector. Watch trajectories converge to the origin (when all eigenvalues lie inside the unit circle), diverge to infinity (when some eigenvalue exceeds the unit circle), or trace saddle-like paths (when eigenvalues straddle the unit circle). This is the geometric dynamics of Section 4.7 made concrete.
+
+<EigenSim mode="dynamics" />
+
+Experiment with the following configurations:
+
+- **Stable node**: Try $A = \begin{bmatrix} 0.5 & 0.1 \\ 0 & 0.3 \end{bmatrix}$. Both eigenvalues are inside the unit disk.
+- **Saddle**: Try $A = \begin{bmatrix} 1.5 & 0 \\ 0 & 0.4 \end{bmatrix}$. One eigenvalue is outside, one inside.
+- **Rotation**: Try $A = \begin{bmatrix} 0 & -1 \\ 1 & 0 \end{bmatrix}$. Eigenvalues are $\pm i$, lying on the unit circle.
+- **Spiral sink**: Try $A = \begin{bmatrix} 0.8 & -0.5 \\ 0.5 & 0.8 \end{bmatrix}$. Complex eigenvalues inside the unit disk.
+
+## 4.11 Why This Matters for Reaching Sheaf Theory
+
+The material in this chapter is not merely a waypoint—it is the conceptual foundation upon which the entire sheaf-theoretic edifice will rest.
+
+**Local-to-global structure.** The eigendecomposition $A = PDP^{-1}$ is the prototypical example of understanding a global object (the matrix $A$) by decomposing it into local, independent pieces (the eigenspaces). Each eigenspace is a "local" subspace where the transformation acts simply (as scalar multiplication), and the full transformation is reconstructed by assembling these local actions. This is precisely the philosophy of sheaves: a sheaf assigns local data to each open set of a topological space, and the global object is recovered by gluing the local pieces together via consistency conditions (the restriction maps).
+
+**Spectral decomposition as a presheaf.** Consider assigning to each eigenvalue $\lambda$ its eigenspace $E_\lambda$. This assignment—which sends a "point" $\lambda$ in the spectrum to a "fiber" $E_\lambda$ over that point—is the germ of a vector bundle, or more precisely, a sheaf on the spectrum of the matrix. When we reach Chapter 6, we will formalize this intuition: the spectrum of a ring (or operator) carries a natural sheaf structure, and the eigenspaces are the stalks of that sheaf.
+
+**Consistency and obstruction.** The failure of diagonalization (the defective case, $g_\lambda < a_\lambda$) is an obstruction—the eigenspaces do not span the full space, and the "local" data (eigenvectors) fails to glue into a "global" basis. This is precisely the kind of obstruction that sheaf cohomology is designed to measure. The Jordan form is the algebraic bookkeeping of this failure, and in the sheaf-theoretic language, the generalized eigenvectors live in higher cohomology groups.
+
+**Dynamics on sheaves.** When we construct the sheaf Laplacian in later chapters, its eigenvalues will measure the "consistency" of data assigned to a network, just as the eigenvalues of a matrix measure the stability of a dynamical system. The spectral gap of the sheaf Laplacian will play the same role as the spectral gap of a Markov chain—measuring how quickly local disagreements propagate to global consensus.
+
+> **Philosophical Insight**: Eigenvalues are the prototype of *spectral* thinking—understanding an object through its spectrum of possible resonant frequencies. This perspective, born here in finite-dimensional linear algebra, will extend first to infinite-dimensional operator theory (the spectrum of a Laplacian on a manifold), then to algebraic geometry (the spectrum of a commutative ring), and finally to sheaf theory (the spectrum as a topological space carrying a structure sheaf). The word "spectral" in "Spectral Theorem" and "spectrum of a sheaf" is not a coincidence—it is the same idea, ascending through ever greater levels of abstraction.
+
+## 4.12 What to Carry Forward
+
+As you move into the chapters on topology, sheaves, and homological algebra, take with you these essential ideas from the eigenvalue theory:
+
+1. **Eigenvalues are intrinsic invariants.** They do not depend on the choice of basis. Similar matrices have the same eigenvalues. This basis-independence is the hallmark of quantities that generalize to coordinate-free, geometric settings—exactly the setting of sheaf theory.
+
+2. **Decomposition into eigenspaces is the prototype of spectral decomposition.** The idea that a vector space splits into invariant subspaces under a linear map generalizes to the decomposition of a sheaf into simpler components. The direct sum $V = E_{\lambda_1} \oplus E_{\lambda_2} \oplus \dots \oplus E_{\lambda_k}$ (when it exists) is the simplest instance of a filtration or grading that permeates homological algebra.
+
+3. **Diagonalization is change of perspective.** The equation $A = PDP^{-1}$ says that complexity is often an artifact of the wrong coordinate system. Sheaf theory generalizes this: data that looks complicated globally may look simple locally, and the art is in understanding how local simplicity assembles into global complexity.
+
+4. **The kernel-image-cokernel sequence.** The map $T - \lambda I$ has a kernel (the eigenspace), an image, and a cokernel (the quotient $W / \text{Im}(T - \lambda I)$). These three objects, and the exact sequences they participate in, are the fundamental building blocks of homological algebra. Every long exact sequence in sheaf cohomology traces its ancestry to this elementary construction.
+
+5. **Obstruction to diagonalization is a cohomological phenomenon.** The defective case, where $g_\lambda < a_\lambda$, is a *failure of splitting*. The eigenspaces do not account for the full space, and the Jordan form records the extent of this failure. In cohomological language, the extension classes measured by $\text{Ext}^1$ are the algebraic avatar of the super-diagonal ones in the Jordan form.
+
+6. **The spectral radius governs asymptotic behavior.** Whether in a Markov chain, a neural network's gradient dynamics, or a sheaf Laplacian's diffusion process, it is the eigenvalues—and specifically the largest ones—that determine the long-term fate of the system. Spectral analysis is not a technique; it is a philosophy.
+
+Armed with these tools, you are ready to leave the world of finite-dimensional vector spaces and enter the world of topology—where the spaces themselves acquire shape, the maps acquire continuity, and the eigenvalue problem transforms into the spectral theory of operators on topological spaces. The journey continues.

@@ -1,0 +1,28 @@
+@import 'katex/dist/katex.min.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply antialiased text-gray-800 bg-white selection:bg-blue-100 selection:text-blue-900;
+  }
+}
+
+/* Custom Math/KaTeX Editorial adjustments */
+.katex-display {
+  @apply my-8 overflow-x-auto overflow-y-hidden py-2;
+}
+.katex {
+  font-size: 1.1em;
+}
+
+/* Base formatting for Prose container */
+.prose {
+  @apply mx-auto;
+}
+
+.prose p {
+  @apply leading-relaxed text-gray-800;
+}
